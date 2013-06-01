@@ -1,4 +1,4 @@
 LatencyPoster
 =============
 
-R scripts and RMarkdown macros for my SRCLD 2013 poster
+R and RMarkdown scripts for my SRCLD 2013 poster
