@@ -3,7 +3,7 @@ library(stringr)
 library(plyr)
 library(lubridate)
 library(ggplot2)
-
+library(lme4)
 
 #### Functions for handling LWL data ------------------------------------------
 
@@ -70,7 +70,7 @@ CalculateLatency <- function(trial, onset_window, target_name) {
   }
   
   # Extract non-redundant info about trial and combine with latency info
-  info <- unique(subset(trial, select = -c(Time, GazeByImageAOI)))
+  info <- unique(subset(trial, select = -c(Time, XMeanTarget, GazeByImageAOI)))
   cbind(info, Latency = latency, Onset = onset_time, FirstLook = first_look)
 }
 
@@ -125,3 +125,24 @@ GetLooksAfterWindow <- function(trial, window) {
 `%contains%` <- function(x, y) any(y %in% x)
 `%lacks%` <- function(x, y) !any(y %in% x)
 IsAllNA <- function(x) all(is.na(x))
+
+
+
+
+#### Analysis munging functions -----------------------------------------------
+
+DetermineVisitNumber <- function(subject_frame) {
+  times <- sort(unique(subject_frame$DateTime))
+  visits <- data.frame(Visit = 1:length(times), DateTime = times)
+  merge(subject_frame, visits, by = "DateTime")  
+}
+
+
+RenumberTrials <- function(subject_frame) {
+  offset <- ifelse(unique(subject_frame$Group == "CS2a"), 36, 38)
+  trials <- subject_frame$TrialNo
+  numbers <- ifelse(offset < trials, -offset, 0)
+  subject_frame$Trial <- trials + numbers
+  subject_frame
+}
+

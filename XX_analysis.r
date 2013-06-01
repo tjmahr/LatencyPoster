@@ -1,50 +1,13 @@
-source('01_functions.r', chdir = TRUE)
 
 
-
-
-# Set onset window parameters
+# Compute latencies
 onset_window <- DefineOnsetWindow(starting_time = 0, window_duration = 50)
-
-
-
-
-
-
-
-
-
-
-
-
-# Locate and load participant data.
-InitializeLocations("L:/DataAnalysis/Mispronunciation/", "CrossSectional2_UW", "027C44MS1")
-figs_dir <- data_dir
-
-subjects1 <- list.files(sprintf('%s/%s/', task_dir, gaze_dir), pattern = "^[0-9]{3}[CLP]")
-folders1 <- paste0(gaze_dir, "/", subjects)
-
-subjects2 <- list.files(sprintf('%s/%s/', task_dir, "Archive_CrossSectional2_Pilot"), pattern = "^[0-9]{3}[CLP]")
-
-folders2 <- paste0("Archive_CrossSectional2_Pilot", "/", subjects2)
-
-folders <- c(folders1, folders2)
-
-
-
-# Get a dataframe of all the real trials
-sessions <- lapply(folders, LoadAndReduceData)
-trials <- Reduce(c, sessions)
-real_trials <- trials[which(trials %@% "StimType" == "real")]
-trial_frame <- ldply(real_trials, MakeLongTrial)
-
-# Make subjects a factor
-trial_frame$Subject <- str_extract(trial_frame$Subject, "^[0-9]{3}")
-trial_frame$Subject <- factor(trial_frame$Subject)
-
 CalculateRealLatency <- MakeLatencyCalculator(onset_window, "Target")
 
-results <- ddply(trial_frame, ~ Subject + TrialNo, CalculateRealLatency)
+# Combine two versions of Cross-sectional2 into same grouping factor
+results <- ddply(rw_data, ~ Subject + TrialNo, CalculateRealLatency)
+
+results <- ddply(rw_data, ~ Subject + TrialNo, CalculateRealLatency)
 
 
 
@@ -52,19 +15,28 @@ results <- ddply(trial_frame, ~ Subject + TrialNo, CalculateRealLatency)
 
 
 
+results$Version <- factor(ifelse(results$Group == "CS1", "CS1", "CS2"))
 
+# Renumber trials
+unique(clean$TrialNo - clean$Trial)
 
-
-
-
-
-
-
-
+by(clean$Trial, INDICES = clean[c("Group", "Block")], max)
 
 
 
 qplot(data = results, x = Latency) + scale_x_continuous(breaks = (0:5 * 500)) + 
+  facet_grid(Version ~ .)
+
+
+
+
+
+
+
+
+
+
+qplot(data = results, x = Latency) 
   labs(title = "latencies for real words in CS2 (606 of 948 trials)")
 
 qplot(data = results, x = Latency) + scale_x_continuous(breaks = (0:5 * 500)) + 
