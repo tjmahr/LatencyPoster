@@ -1,5 +1,8 @@
 library(xlsx)
-
+library(stringr)
+library(plyr)
+library(lubridate)
+library(ggplot2)
 
 
 #### Functions for handling LWL data ------------------------------------------
