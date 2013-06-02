@@ -7,3 +7,6 @@ o: report-out.html
 
 format: docx
 o: report-out.docx
+
+format: markdown_github 
+o: report-out.md
