@@ -7,7 +7,7 @@ library(lme4)
 
 #### Functions for handling LWL data ------------------------------------------
 
-source('L:/scripts/LookingWhileListeningBeta.r', chdir = TRUE)
+# source('L:/scripts/LookingWhileListeningBeta.r', chdir = TRUE)
 
 LoadAllMPData <- function(subject_paths) {
   sessions <- lapply(subject_paths, LoadAndReduceData)

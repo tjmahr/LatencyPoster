@@ -1,21 +1,21 @@
 
+load("data/rw_data.RData")
+
 
 # Compute latencies
 onset_window <- DefineOnsetWindow(starting_time = 0, window_duration = 50)
 CalculateRealLatency <- MakeLatencyCalculator(onset_window, "Target")
+results <- ddply(rw_data, ~ Subject + TrialNo, CalculateRealLatency)
 
 # Combine two versions of Cross-sectional2 into same grouping factor
-results <- ddply(rw_data, ~ Subject + TrialNo, CalculateRealLatency)
-
-results <- ddply(rw_data, ~ Subject + TrialNo, CalculateRealLatency)
-
-
-
-
-
-
-
 results$Version <- factor(ifelse(results$Group == "CS1", "CS1", "CS2"))
+
+
+
+
+
+
+
 
 # Renumber trials
 unique(clean$TrialNo - clean$Trial)

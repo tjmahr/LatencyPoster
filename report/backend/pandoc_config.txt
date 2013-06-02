@@ -1,0 +1,9 @@
+s: 
+csl: backend/apa_style.csl
+bibliography: refs.bib
+
+format: html5
+o: report-out.html
+
+format: docx
+o: report-out.docx
