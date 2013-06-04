@@ -86,8 +86,9 @@ print(p)
 
 ```{r, warning=FALSE, results='asis'}
 m <- lm(Latency ~ Version + EVT + Age, subject_means)
-
-print(ascii(m), type = "pandoc")
+m_tab <- ascii(m)
+names(m_tab$x)[4] <- "Pr(>t)"
+print(m_tab, type = "pandoc")
 ```
 
 ```{r}

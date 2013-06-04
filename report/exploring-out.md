@@ -170,12 +170,13 @@ print(p)
 
 ~~~~ {.r}
 m <- lm(Latency ~ Version + EVT + Age, subject_means)
-
-print(ascii(m), type = "pandoc")
+m_tab <- ascii(m)
+names(m_tab$x)[4] <- "Pr(>t)"
+print(m_tab, type = "pandoc")
 ~~~~
 
-||**Estimate**|**Std. Error**|**t value**|**Pr(\>|t|)**|
-|---|:-----------|:-------------|:----------|:------------|
+||**Estimate**|**Std. Error**|**t value**|**Pr(\>t)**|
+|---|:-----------|:-------------|:----------|:----------|
 |(Intercept)|812.62|90.99|8.93|0.00|
 |VersionCS2|-7.99|29.40|-0.27|0.79|
 |EVT|0.16|1.03|0.15|0.88|

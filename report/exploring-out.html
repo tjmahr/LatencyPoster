@@ -337,8 +337,9 @@ p &lt;-<span class="st"> </span><span class="kw">ggplot</span>(subject_means, <s
 </figure>
 <h3 id="model-the-aggregated-data">Model the aggregated data</h3>
 <pre class="sourceCode r"><code class="sourceCode r">m &lt;-<span class="st"> </span><span class="kw">lm</span>(Latency ~<span class="st"> </span>Version +<span class="st"> </span>EVT +<span class="st"> </span>Age, subject_means)
-
-<span class="kw">print</span>(<span class="kw">ascii</span>(m), <span class="dt">type =</span> <span class="st">&quot;pandoc&quot;</span>)</code></pre>
+m_tab &lt;-<span class="st"> </span><span class="kw">ascii</span>(m)
+<span class="kw">names</span>(m_tab$x)[<span class="dv">4</span>] &lt;-<span class="st"> &quot;Pr(&gt;t)&quot;</span>
+<span class="kw">print</span>(m_tab, <span class="dt">type =</span> <span class="st">&quot;pandoc&quot;</span>)</code></pre>
 <table>
 <thead>
 <tr class="header">
@@ -346,7 +347,7 @@ p &lt;-<span class="st"> </span><span class="kw">ggplot</span>(subject_means, <s
 <th style="text-align: left;"><strong>Estimate</strong></th>
 <th style="text-align: left;"><strong>Std. Error</strong></th>
 <th style="text-align: left;"><strong>t value</strong></th>
-<th style="text-align: left;"><strong>Pr(&gt;|t|)</strong></th>
+<th style="text-align: left;"><strong>Pr(&gt;t)</strong></th>
 </tr>
 </thead>
 <tbody>
