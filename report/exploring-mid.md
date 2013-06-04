@@ -284,6 +284,36 @@ I need to find a transformation or a link function better suited for the distrib
 
 
 
+# Does Trial Number (fatigue) predict latency?
+
+Yes, there is a significant effect of Trial Number on Latency. It's a very small effect.
+
+
+```r
+qplot(data = results, x = Trial, y = Latency) + geom_smooth(method = "lm")
+```
+
+![plot of chunk unnamed-chunk-12](figure/unnamed-chunk-12.png) 
+
+```r
+m2 <- lm(data = results, Latency ~ Trial + Version + EVT + Age)
+m_tab <- ascii(m2)
+names(m_tab$x)[4] <- "Pr(>t)"
+print(m_tab, type = "pandoc")
+```
+
+              **Estimate**   **Std. Error**   **t value**   **Pr(>t)**  
+------------- -------------- ---------------- ------------- ------------
+(Intercept)   804.39         80.81            9.95          0.00        
+Trial         2.72           1.07             2.54          0.01        
+VersionCS2    -20.79         23.29            -0.89         0.37        
+EVT           -0.03          0.88             -0.03         0.98        
+Age           -2.60          2.19             -1.19         0.24        
+------------- -------------- ---------------- ------------- ------------
+
+
+
+
 
 
 
