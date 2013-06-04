@@ -328,12 +328,10 @@ num_non_NA &lt;-<span class="st"> </span><span class="kw">length</span>(<span cl
 merge_vars &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;Subject&quot;</span>, <span class="st">&quot;EVT&quot;</span>, <span class="st">&quot;Version&quot;</span>, <span class="st">&quot;Age&quot;</span>)
 subject_means &lt;-<span class="st"> </span><span class="kw">unique</span>(<span class="kw">merge</span>(subject_means, results[merge_vars], <span class="dt">by =</span> <span class="st">&quot;Subject&quot;</span>))
 p &lt;-<span class="st"> </span><span class="kw">ggplot</span>(subject_means, <span class="kw">aes</span>(<span class="dt">x =</span> Latency, <span class="dt">fill =</span> Version)) +<span class="st"> </span><span class="kw">geom_dotplot</span>(<span class="dt">method =</span> <span class="st">&quot;histodot&quot;</span>, 
-    <span class="dt">stackgroups =</span> <span class="ot">FALSE</span>) +<span class="st"> </span><span class="kw">scale_y_continuous</span>(<span class="dt">name =</span> <span class="st">&quot;&quot;</span>, <span class="dt">breaks =</span> <span class="ot">NA</span>)
+    <span class="dt">stackgroups =</span> <span class="ot">FALSE</span>) +<span class="st"> </span><span class="kw">scale_y_continuous</span>(<span class="dt">name =</span> <span class="st">&quot;&quot;</span>, <span class="dt">breaks =</span> <span class="ot">NULL</span>)
 <span class="kw">print</span>(p)</code></pre>
 <pre><code>## stat_bindot: binwidth defaulted to range/30. Use &#39;binwidth = x&#39; to adjust
 ## this.</code></pre>
-<pre><code>## Warning: breaks = NA is deprecated. Please use breaks = NULL to remove
-## breaks in the scale. (Deprecated; last used in version 0.8.9)</code></pre>
 <figure>
 <img src="figure/unnamed-chunk-8.png" alt="plot of chunk unnamed-chunk-8" /><figcaption>plot of chunk unnamed-chunk-8</figcaption>
 </figure>

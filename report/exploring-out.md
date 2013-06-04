@@ -157,15 +157,12 @@ subject_means <- aggregate(Latency ~ Subject, results, mean)
 merge_vars <- c("Subject", "EVT", "Version", "Age")
 subject_means <- unique(merge(subject_means, results[merge_vars], by = "Subject"))
 p <- ggplot(subject_means, aes(x = Latency, fill = Version)) + geom_dotplot(method = "histodot", 
-    stackgroups = FALSE) + scale_y_continuous(name = "", breaks = NA)
+    stackgroups = FALSE) + scale_y_continuous(name = "", breaks = NULL)
 print(p)
 ~~~~
 
     ## stat_bindot: binwidth defaulted to range/30. Use 'binwidth = x' to adjust
     ## this.
-
-    ## Warning: breaks = NA is deprecated. Please use breaks = NULL to remove
-    ## breaks in the scale. (Deprecated; last used in version 0.8.9)
 
 ![plot of chunk unnamed-chunk-8](figure/unnamed-chunk-8.png)
 

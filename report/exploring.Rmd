@@ -64,7 +64,7 @@ num_non_NA <- length(which(!is.na(results$Latency)))
 
 Reaction times slower than `r round(too_slow)` ms will be removed. There are `r num_too_slow` such trials, which is `r round(num_too_slow / num_non_NA)`% of the data.
 
-```{r, warning=FALSE, results='asis', fig.height=4}
+```{r, warning=FALSE, results='asis'}
 results$Latency[results$Latency > too_slow] <- NA
 PrintDescriptives(results)
 qplot(data = results, x = Latency) + scale_x_continuous(breaks = (0:5 * 500)) + 
@@ -74,11 +74,11 @@ qplot(data = results, x = Latency) + scale_x_continuous(breaks = (0:5 * 500)) +
 ## Model the data
 
 Aggregate reaction times by subject
-```{r}
+```{r, fig.height=4}
 subject_means <- aggregate(Latency ~ Subject, results, mean)
 merge_vars <- c("Subject", "EVT", "Version", "Age")
 subject_means <- unique(merge(subject_means, results[merge_vars], by="Subject"))
-p <- ggplot(subject_means, aes(x = Latency, fill = Version)) + geom_dotplot(method="histodot", stackgroups=FALSE) + scale_y_continuous(name = "", breaks = NA)
+p <- ggplot(subject_means, aes(x = Latency, fill = Version)) + geom_dotplot(method="histodot", stackgroups=FALSE) + scale_y_continuous(name = "", breaks = NULL)
 print(p)
 ```
 
