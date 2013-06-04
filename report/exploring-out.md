@@ -114,7 +114,7 @@ num_too_slow <- length(which(results$Latency > too_slow))
 num_non_NA <- length(which(!is.na(results$Latency)))
 ~~~~
 
-Reaction times slower than 1725 ms will be removed. There are 60 such trials, which is 0% of the data.
+Reaction times slower than 1725 ms will be removed. There are 60 such trials, which is 6% of the data.
 
 ~~~~ {.r}
 results$Latency[results$Latency > too_slow] <- NA

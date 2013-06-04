@@ -249,7 +249,7 @@ results$Latency[results$TooFast] &lt;-<span class="st"> </span><span class="ot">
 too_slow &lt;-<span class="st"> </span><span class="kw">mean</span>(results$Latency, <span class="dt">na.rm =</span> <span class="ot">TRUE</span>) +<span class="st"> </span>two_sd
 num_too_slow &lt;-<span class="st"> </span><span class="kw">length</span>(<span class="kw">which</span>(results$Latency &gt;<span class="st"> </span>too_slow))
 num_non_NA &lt;-<span class="st"> </span><span class="kw">length</span>(<span class="kw">which</span>(!<span class="kw">is.na</span>(results$Latency)))</code></pre>
-<p>Reaction times slower than 1725 ms will be removed. There are 60 such trials, which is 0% of the data.</p>
+<p>Reaction times slower than 1725 ms will be removed. There are 60 such trials, which is 6% of the data.</p>
 <pre class="sourceCode r"><code class="sourceCode r">results$Latency[results$Latency &gt;<span class="st"> </span>too_slow] &lt;-<span class="st"> </span><span class="ot">NA</span>
 <span class="kw">PrintDescriptives</span>(results)</code></pre>
 <table>
