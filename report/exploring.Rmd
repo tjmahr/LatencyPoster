@@ -1,41 +1,25 @@
-## Get the data ready
+# Exploring the latency data
 
-Load the trial-by-trial data.
+This `Rmd` file is where I try to figure out what's going on in the data.
 
 ```{r, results='hide', message=FALSE, warning=FALSE}
+# Latency data
 setwd("../")
-source('01_functions.r', chdir = TRUE)
-load("data/clean.RData")
-within_ms <- 50
+source('R/01_functions.r', chdir = TRUE)
+load("data/results.RData")
 ```
 
-### Compute the latencies. 
-
-Within the first `r within_ms` ms of target-onset, the subject must be:
-
-* Not looking to the target word
-* Looking on the screen
-
-```{r, cache=TRUE}
-onset_window <- DefineOnsetWindow(starting_time = 0, window_duration = within_ms)
-CalculateRealLatency <- MakeLatencyCalculator(onset_window, "Target")
-results <- ddply(clean, ~ Subject + TrialNo, CalculateRealLatency)
-# Combine two versions of Cross-sectional2 into same grouping factor
-results$Version <- factor(ifelse(results$Group == "CS1", "CS1", "CS2"))
-```
-
-
-
-
-## Look at the raw latency data
-
+## Look at the untrimmed latency data
 ```{r, warning=FALSE, results='asis'}
-descriptives <- describeBy(results$Latency, group=results$Version, mat=T, skew=F)
-rownames(descriptives) <- c("CS1", "CS2")
-# Convert to a dataframe for table-printing
-descriptives <- t(descriptives)[-c(1:3), ]
-descriptives <- as.data.frame(descriptives)
-print(ascii(descriptives), type = "pandoc")
+PrintDescriptives <- function(results) {
+  descriptives <- describeBy(results$Latency, group=results$Version, mat=T, skew=F)
+  rownames(descriptives) <- c("CS1", "CS2")
+  # Convert to a dataframe for table-printing
+  descriptives <- t(descriptives)[-c(1:3), ]
+  descriptives <- as.data.frame(descriptives)
+  print(ascii(descriptives), type = "pandoc")  
+}
+PrintDescriptives(results)
 ```
 
 These means are very close! Let's look at the histograms.
@@ -45,68 +29,102 @@ qplot(data = results, x = Latency) + scale_x_continuous(breaks = (0:5 * 500)) +
   facet_grid(Version ~ .)
 ```
 
-Look at the number of NA latencies in each version of the experiment.
+Look at the number of NA latencies in each version of the experiment. There is probably a significant effect of group on the odds of obtaining a latency.
 
 ```{r, message=FALSE, warning=FALSE, results='asis'}
-library(reshape2)
 results$NotNA <- ifelse(is.na(results$Latency), 0, 1)
 not_na <- dcast(results, Version ~ NotNA, value.var = "NotNA")
-names(not_na) <- c("Version", "NA Latencies", "Real Latencies")
+names(not_na) <- c("Version", "Number NA Latencies", "Number Real Latencies")
 print(ascii(not_na), type = "pandoc")
 ```
 
+## Trim off fast and slow latencies
 
+Trim off the impossibly fast latencies (i.e., less than 250 ms.)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-*** 
-
-## Scratch area for testing things out
-
-**Ciations**
-
-* @BaayenRTs recommend blah blah blah.
-* We try the inverse-normal distribution [@BaayenRTs],
-
-**Tables?**
-
-Use the `ascii` package to make a captioned Pandoc table:
-
-```{r, results ='asis', warning=FALSE}
-library(ascii)
-data(esoph)
-print(ascii(esoph[1:10,]), type = "pandoc")
+```{rmessage=FALSE, warning=FALSE, results='asis'}
+results$TooFast <- round(results$Latency) < 250
+# How many latencies were too fast within each group
+too_fast <- dcast(results, Version ~ TooFast)
+names(too_fast) <- c("Version", "Number > 250 ms", "Number < 250 ms", "Number NA")
+print(ascii(too_fast), type = "pandoc")
+# Replace too fast of latencies with NA values
+results$Latency[results$TooFast] <- NA
+PrintDescriptives(results)
 ```
-Table: This is a table caption.
 
-## References
+Trim off the exceptionally slow latencies.
+
+```{r}
+two_sd <- 2 * sd(results$Latency, na.rm=TRUE)
+too_slow <- mean(results$Latency, na.rm = TRUE) + two_sd
+num_too_slow <- length(which(results$Latency > too_slow))
+num_non_NA <- length(which(!is.na(results$Latency)))
+```
+
+Reaction times slower than `r round(too_slow)` ms will be removed. There are `r num_too_slow` such trials, which is `r round(num_too_slow / num_non_NA)`% of the data.
+
+```{r, warning=FALSE, results='asis', fig.height=4}
+results$Latency[results$Latency > too_slow] <- NA
+PrintDescriptives(results)
+qplot(data = results, x = Latency) + scale_x_continuous(breaks = (0:5 * 500)) + 
+  facet_grid(Version ~ .)
+```
+
+## Model the data
+
+Aggregate reaction times by subject
+```{r}
+subject_means <- aggregate(Latency ~ Subject, results, mean)
+merge_vars <- c("Subject", "EVT", "Version", "Age")
+subject_means <- unique(merge(subject_means, results[merge_vars], by="Subject"))
+p <- ggplot(subject_means, aes(x = Latency, fill = Version)) + geom_dotplot(method="histodot", stackgroups=FALSE) + scale_y_continuous(name = "", breaks = NA)
+print(p)
+```
+
+### Model the aggregated data
+
+```{r, warning=FALSE, results='asis'}
+m <- lm(Latency ~ Version + EVT + Age, subject_means)
+print(ascii(summary(m)), "pandoc")
+qplot(data = subject_means, x = EVT, y = Latency) + 
+  geom_smooth(method = "lm") + 
+  labs(title = "By-Subject Reaction Times By EVT Raw Score")
+qplot(data = subject_means, x = Age, y = Latency) + 
+  geom_smooth(method = "lm") + 
+  labs(title = "By-Subject Reaction Times By Age in Months")
+```
+
+### Check the model assumptions
+
+```{r}
+print(gvlma(m))
+```
+
+I need to find a transformation or a link function better suited for the distribution of these data.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

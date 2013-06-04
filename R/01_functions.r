@@ -6,6 +6,8 @@ library(ggplot2)
 library(lme4)
 library(ascii)
 library(psych)
+library(reshape2)
+library(lmSupport)
 
 #### Functions for handling LWL data ------------------------------------------
 

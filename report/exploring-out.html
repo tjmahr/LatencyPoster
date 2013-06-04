@@ -29,31 +29,23 @@ code > span.er { color: #ff0000; font-weight: bold; }
   </style>
 </head>
 <body>
-<h2 id="get-the-data-ready">Get the data ready</h2>
-<p>Load the trial-by-trial data.</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">setwd</span>(<span class="st">&quot;../&quot;</span>)
-<span class="kw">source</span>(<span class="st">&quot;01_functions.r&quot;</span>, <span class="dt">chdir =</span> <span class="ot">TRUE</span>)
-<span class="kw">load</span>(<span class="st">&quot;data/clean.RData&quot;</span>)
-within_ms &lt;-<span class="st"> </span><span class="dv">50</span></code></pre>
-<h3 id="compute-the-latencies.">Compute the latencies.</h3>
-<p>Within the first 50 ms of target-onset, the subject must be:</p>
-<ul>
-<li>Not looking to the target word</li>
-<li>Looking on the screen</li>
-</ul>
-<pre class="sourceCode r"><code class="sourceCode r">onset_window &lt;-<span class="st"> </span><span class="kw">DefineOnsetWindow</span>(<span class="dt">starting_time =</span> <span class="dv">0</span>, <span class="dt">window_duration =</span> within_ms)
-CalculateRealLatency &lt;-<span class="st"> </span><span class="kw">MakeLatencyCalculator</span>(onset_window, <span class="st">&quot;Target&quot;</span>)
-results &lt;-<span class="st"> </span><span class="kw">ddply</span>(clean, ~Subject +<span class="st"> </span>TrialNo, CalculateRealLatency)
-<span class="co"># Combine two versions of Cross-sectional2 into same grouping factor</span>
-results$Version &lt;-<span class="st"> </span><span class="kw">factor</span>(<span class="kw">ifelse</span>(results$Group ==<span class="st"> &quot;CS1&quot;</span>, <span class="st">&quot;CS1&quot;</span>, <span class="st">&quot;CS2&quot;</span>))</code></pre>
-<h2 id="look-at-the-raw-latency-data">Look at the raw latency data</h2>
-<pre class="sourceCode r"><code class="sourceCode r">descriptives &lt;-<span class="st"> </span><span class="kw">describeBy</span>(results$Latency, <span class="dt">group =</span> results$Version, <span class="dt">mat =</span> T, 
-    <span class="dt">skew =</span> F)
-<span class="kw">rownames</span>(descriptives) &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;CS1&quot;</span>, <span class="st">&quot;CS2&quot;</span>)
-<span class="co"># Convert to a dataframe for table-printing</span>
-descriptives &lt;-<span class="st"> </span><span class="kw">t</span>(descriptives)[-<span class="kw">c</span>(<span class="dv">1</span>:<span class="dv">3</span>), ]
-descriptives &lt;-<span class="st"> </span><span class="kw">as.data.frame</span>(descriptives)
-<span class="kw">print</span>(<span class="kw">ascii</span>(descriptives), <span class="dt">type =</span> <span class="st">&quot;pandoc&quot;</span>)</code></pre>
+<h1 id="exploring-the-latency-data">Exploring the latency data</h1>
+<p>This <code>Rmd</code> file is where I try to figure out what's going on in the data.</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Latency data</span>
+<span class="kw">setwd</span>(<span class="st">&quot;../&quot;</span>)
+<span class="kw">source</span>(<span class="st">&quot;R/01_functions.r&quot;</span>, <span class="dt">chdir =</span> <span class="ot">TRUE</span>)
+<span class="kw">load</span>(<span class="st">&quot;data/results.RData&quot;</span>)</code></pre>
+<h2 id="look-at-the-untrimmed-latency-data">Look at the untrimmed latency data</h2>
+<pre class="sourceCode r"><code class="sourceCode r">PrintDescriptives &lt;-<span class="st"> </span>function(results) {
+    descriptives &lt;-<span class="st"> </span><span class="kw">describeBy</span>(results$Latency, <span class="dt">group =</span> results$Version, <span class="dt">mat =</span> T, 
+        <span class="dt">skew =</span> F)
+    <span class="kw">rownames</span>(descriptives) &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;CS1&quot;</span>, <span class="st">&quot;CS2&quot;</span>)
+    <span class="co"># Convert to a dataframe for table-printing</span>
+    descriptives &lt;-<span class="st"> </span><span class="kw">t</span>(descriptives)[-<span class="kw">c</span>(<span class="dv">1</span>:<span class="dv">3</span>), ]
+    descriptives &lt;-<span class="st"> </span><span class="kw">as.data.frame</span>(descriptives)
+    <span class="kw">print</span>(<span class="kw">ascii</span>(descriptives), <span class="dt">type =</span> <span class="st">&quot;pandoc&quot;</span>)
+}
+<span class="kw">PrintDescriptives</span>(results)</code></pre>
 <table>
 <thead>
 <tr class="header">
@@ -123,21 +115,20 @@ descriptives &lt;-<span class="st"> </span><span class="kw">as.data.frame</span>
 <pre><code>## stat_bin: binwidth defaulted to range/30. Use &#39;binwidth = x&#39; to adjust
 ## this.</code></pre>
 <figure>
-<img src="figure/unnamed-chunk-4.png" alt="Histograms of untrimmed latencies" /><figcaption>Histograms of untrimmed latencies</figcaption>
+<img src="figure/unnamed-chunk-3.png" alt="Histograms of untrimmed latencies" /><figcaption>Histograms of untrimmed latencies</figcaption>
 </figure>
-<p>Look at the number of NA latencies in each version of the experiment.</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(reshape2)
-results$NotNA &lt;-<span class="st"> </span><span class="kw">ifelse</span>(<span class="kw">is.na</span>(results$Latency), <span class="dv">0</span>, <span class="dv">1</span>)
+<p>Look at the number of NA latencies in each version of the experiment. There is probably a significant effect of group on the odds of obtaining a latency.</p>
+<pre class="sourceCode r"><code class="sourceCode r">results$NotNA &lt;-<span class="st"> </span><span class="kw">ifelse</span>(<span class="kw">is.na</span>(results$Latency), <span class="dv">0</span>, <span class="dv">1</span>)
 not_na &lt;-<span class="st"> </span><span class="kw">dcast</span>(results, Version ~<span class="st"> </span>NotNA, <span class="dt">value.var =</span> <span class="st">&quot;NotNA&quot;</span>)
-<span class="kw">names</span>(not_na) &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;Version&quot;</span>, <span class="st">&quot;NA Latencies&quot;</span>, <span class="st">&quot;Real Latencies&quot;</span>)
+<span class="kw">names</span>(not_na) &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;Version&quot;</span>, <span class="st">&quot;Number NA Latencies&quot;</span>, <span class="st">&quot;Number Real Latencies&quot;</span>)
 <span class="kw">print</span>(<span class="kw">ascii</span>(not_na), <span class="dt">type =</span> <span class="st">&quot;pandoc&quot;</span>)</code></pre>
 <table>
 <thead>
 <tr class="header">
 <th style="text-align: left;"></th>
 <th style="text-align: left;"><strong>Version</strong></th>
-<th style="text-align: left;"><strong>NA Latencies</strong></th>
-<th style="text-align: left;"><strong>Real Latencies</strong></th>
+<th style="text-align: left;"><strong>Number NA Latencies</strong></th>
+<th style="text-align: left;"><strong>Number Real Latencies</strong></th>
 </tr>
 </thead>
 <tbody>
@@ -155,113 +146,275 @@ not_na &lt;-<span class="st"> </span><span class="kw">dcast</span>(results, Vers
 </tr>
 </tbody>
 </table>
-<hr />
-<h2 id="scratch-area-for-testing-things-out">Scratch area for testing things out</h2>
-<p><strong>Ciations</strong></p>
-<ul>
-<li>@BaayenRTs recommend blah blah blah.</li>
-<li>We try the inverse-normal distribution [@BaayenRTs],</li>
-</ul>
-<p><strong>Tables?</strong></p>
-<p>Use the <code>ascii</code> package to make a captioned Pandoc table:</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(ascii)
-<span class="kw">data</span>(esoph)
-<span class="kw">print</span>(<span class="kw">ascii</span>(esoph[<span class="dv">1</span>:<span class="dv">10</span>, ]), <span class="dt">type =</span> <span class="st">&quot;pandoc&quot;</span>)</code></pre>
+<h2 id="trim-off-fast-and-slow-latencies">Trim off fast and slow latencies</h2>
+<p>Trim off the impossibly fast latencies (i.e., less than 250 ms.)</p>
+<pre class="sourceCode r"><code class="sourceCode r">results$TooFast &lt;-<span class="st"> </span><span class="kw">round</span>(results$Latency) &lt;<span class="st"> </span><span class="dv">250</span>
+<span class="co"># How many latencies were too fast within each group</span>
+too_fast &lt;-<span class="st"> </span><span class="kw">dcast</span>(results, Version ~<span class="st"> </span>TooFast)
+<span class="kw">names</span>(too_fast) &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;Version&quot;</span>, <span class="st">&quot;Number &gt; 250 ms&quot;</span>, <span class="st">&quot;Number &lt; 250 ms&quot;</span>, <span class="st">&quot;Number NA&quot;</span>)
+<span class="kw">print</span>(<span class="kw">ascii</span>(too_fast), <span class="dt">type =</span> <span class="st">&quot;pandoc&quot;</span>)</code></pre>
 <table>
-<caption>This is a table caption.</caption>
 <thead>
 <tr class="header">
 <th style="text-align: left;"></th>
-<th style="text-align: left;"><strong>agegp</strong></th>
-<th style="text-align: left;"><strong>alcgp</strong></th>
-<th style="text-align: left;"><strong>tobgp</strong></th>
-<th style="text-align: left;"><strong>ncases</strong></th>
-<th style="text-align: left;"><strong>ncontrols</strong></th>
+<th style="text-align: left;"><strong>Version</strong></th>
+<th style="text-align: left;"><strong>Number &gt; 250 ms</strong></th>
+<th style="text-align: left;"><strong>Number &lt; 250 ms</strong></th>
+<th style="text-align: left;"><strong>Number NA</strong></th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">1</td>
-<td style="text-align: left;">25-34</td>
-<td style="text-align: left;">0-39g/day</td>
-<td style="text-align: left;">0-9g/day</td>
-<td style="text-align: left;">0.00</td>
-<td style="text-align: left;">40.00</td>
+<td style="text-align: left;">CS1</td>
+<td style="text-align: left;">361.00</td>
+<td style="text-align: left;">36.00</td>
+<td style="text-align: left;">827.00</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">2</td>
-<td style="text-align: left;">25-34</td>
-<td style="text-align: left;">0-39g/day</td>
-<td style="text-align: left;">10-19</td>
-<td style="text-align: left;">0.00</td>
-<td style="text-align: left;">10.00</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">3</td>
-<td style="text-align: left;">25-34</td>
-<td style="text-align: left;">0-39g/day</td>
-<td style="text-align: left;">20-29</td>
-<td style="text-align: left;">0.00</td>
-<td style="text-align: left;">6.00</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">4</td>
-<td style="text-align: left;">25-34</td>
-<td style="text-align: left;">0-39g/day</td>
-<td style="text-align: left;">30+</td>
-<td style="text-align: left;">0.00</td>
-<td style="text-align: left;">5.00</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">5</td>
-<td style="text-align: left;">25-34</td>
-<td style="text-align: left;">40-79</td>
-<td style="text-align: left;">0-9g/day</td>
-<td style="text-align: left;">0.00</td>
-<td style="text-align: left;">27.00</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">6</td>
-<td style="text-align: left;">25-34</td>
-<td style="text-align: left;">40-79</td>
-<td style="text-align: left;">10-19</td>
-<td style="text-align: left;">0.00</td>
-<td style="text-align: left;">7.00</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">7</td>
-<td style="text-align: left;">25-34</td>
-<td style="text-align: left;">40-79</td>
-<td style="text-align: left;">20-29</td>
-<td style="text-align: left;">0.00</td>
-<td style="text-align: left;">4.00</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">8</td>
-<td style="text-align: left;">25-34</td>
-<td style="text-align: left;">40-79</td>
-<td style="text-align: left;">30+</td>
-<td style="text-align: left;">0.00</td>
-<td style="text-align: left;">7.00</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">9</td>
-<td style="text-align: left;">25-34</td>
-<td style="text-align: left;">80-119</td>
-<td style="text-align: left;">0-9g/day</td>
-<td style="text-align: left;">0.00</td>
-<td style="text-align: left;">2.00</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">10</td>
-<td style="text-align: left;">25-34</td>
-<td style="text-align: left;">80-119</td>
-<td style="text-align: left;">10-19</td>
-<td style="text-align: left;">0.00</td>
-<td style="text-align: left;">1.00</td>
+<td style="text-align: left;">CS2</td>
+<td style="text-align: left;">592.00</td>
+<td style="text-align: left;">52.00</td>
+<td style="text-align: left;">376.00</td>
 </tr>
 </tbody>
 </table>
-<h2 id="references">References</h2>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Replace too fast of latencies with NA values</span>
+results$Latency[results$TooFast] &lt;-<span class="st"> </span><span class="ot">NA</span>
+<span class="kw">PrintDescriptives</span>(results)</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: left;"><strong>CS1</strong></th>
+<th style="text-align: left;"><strong>CS2</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">n</td>
+<td style="text-align: left;">361</td>
+<td style="text-align: left;">592</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">mean</td>
+<td style="text-align: left;">816.2</td>
+<td style="text-align: left;">806.6</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sd</td>
+<td style="text-align: left;">434.2</td>
+<td style="text-align: left;">471.6</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">median</td>
+<td style="text-align: left;">716.1</td>
+<td style="text-align: left;">666.2</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">trimmed</td>
+<td style="text-align: left;">748.8</td>
+<td style="text-align: left;">734.0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">mad</td>
+<td style="text-align: left;">321.0</td>
+<td style="text-align: left;">395.1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">min</td>
+<td style="text-align: left;">249.8</td>
+<td style="text-align: left;">249.8</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">max</td>
+<td style="text-align: left;">2498</td>
+<td style="text-align: left;">2482</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">range</td>
+<td style="text-align: left;">2248</td>
+<td style="text-align: left;">2232</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">se</td>
+<td style="text-align: left;">22.85</td>
+<td style="text-align: left;">19.38</td>
+</tr>
+</tbody>
+</table>
+<p>Trim off the exceptionally slow latencies.</p>
+<pre class="sourceCode r"><code class="sourceCode r">two_sd &lt;-<span class="st"> </span><span class="dv">2</span> *<span class="st"> </span><span class="kw">sd</span>(results$Latency, <span class="dt">na.rm =</span> <span class="ot">TRUE</span>)
+too_slow &lt;-<span class="st"> </span><span class="kw">mean</span>(results$Latency, <span class="dt">na.rm =</span> <span class="ot">TRUE</span>) +<span class="st"> </span>two_sd
+num_too_slow &lt;-<span class="st"> </span><span class="kw">length</span>(<span class="kw">which</span>(results$Latency &gt;<span class="st"> </span>too_slow))
+num_non_NA &lt;-<span class="st"> </span><span class="kw">length</span>(<span class="kw">which</span>(!<span class="kw">is.na</span>(results$Latency)))</code></pre>
+<p>Reaction times slower than 1725 ms will be removed. There are 60 such trials, which is 0% of the data.</p>
+<pre class="sourceCode r"><code class="sourceCode r">results$Latency[results$Latency &gt;<span class="st"> </span>too_slow] &lt;-<span class="st"> </span><span class="ot">NA</span>
+<span class="kw">PrintDescriptives</span>(results)</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: left;"><strong>CS1</strong></th>
+<th style="text-align: left;"><strong>CS2</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">n</td>
+<td style="text-align: left;">340</td>
+<td style="text-align: left;">553</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">mean</td>
+<td style="text-align: left;">736.8</td>
+<td style="text-align: left;">721.4</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sd</td>
+<td style="text-align: left;">298.0</td>
+<td style="text-align: left;">353.4</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">median</td>
+<td style="text-align: left;">699.5</td>
+<td style="text-align: left;">632.9</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">trimmed</td>
+<td style="text-align: left;">714.3</td>
+<td style="text-align: left;">681.5</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">mad</td>
+<td style="text-align: left;">296.3</td>
+<td style="text-align: left;">345.7</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">min</td>
+<td style="text-align: left;">249.8</td>
+<td style="text-align: left;">249.8</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">max</td>
+<td style="text-align: left;">1682</td>
+<td style="text-align: left;">1715</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">range</td>
+<td style="text-align: left;">1432</td>
+<td style="text-align: left;">1466</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">se</td>
+<td style="text-align: left;">16.16</td>
+<td style="text-align: left;">15.03</td>
+</tr>
+</tbody>
+</table>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">qplot</span>(<span class="dt">data =</span> results, <span class="dt">x =</span> Latency) +<span class="st"> </span><span class="kw">scale_x_continuous</span>(<span class="dt">breaks =</span> (<span class="dv">0</span>:<span class="dv">5</span> *<span class="st"> </span><span class="dv">500</span>)) +<span class="st"> </span>
+<span class="st">    </span><span class="kw">facet_grid</span>(Version ~<span class="st"> </span>.)</code></pre>
+<pre><code>## stat_bin: binwidth defaulted to range/30. Use &#39;binwidth = x&#39; to adjust
+## this.</code></pre>
+<pre><code>## stat_bin: binwidth defaulted to range/30. Use &#39;binwidth = x&#39; to adjust
+## this.</code></pre>
+<figure>
+<img src="figure/unnamed-chunk-7.png" alt="plot of chunk unnamed-chunk-7" /><figcaption>plot of chunk unnamed-chunk-7</figcaption>
+</figure>
+<h2 id="model-the-data">Model the data</h2>
+<p>Aggregate reaction times by subject</p>
+<pre class="sourceCode r"><code class="sourceCode r">subject_means &lt;-<span class="st"> </span><span class="kw">aggregate</span>(Latency ~<span class="st"> </span>Subject, results, mean)
+merge_vars &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;Subject&quot;</span>, <span class="st">&quot;EVT&quot;</span>, <span class="st">&quot;Version&quot;</span>, <span class="st">&quot;Age&quot;</span>)
+subject_means &lt;-<span class="st"> </span><span class="kw">unique</span>(<span class="kw">merge</span>(subject_means, results[merge_vars], <span class="dt">by =</span> <span class="st">&quot;Subject&quot;</span>))
+p &lt;-<span class="st"> </span><span class="kw">ggplot</span>(subject_means, <span class="kw">aes</span>(<span class="dt">x =</span> Latency, <span class="dt">fill =</span> Version)) +<span class="st"> </span><span class="kw">geom_dotplot</span>(<span class="dt">method =</span> <span class="st">&quot;histodot&quot;</span>, 
+    <span class="dt">stackgroups =</span> <span class="ot">FALSE</span>) +<span class="st"> </span><span class="kw">scale_y_continuous</span>(<span class="dt">name =</span> <span class="st">&quot;&quot;</span>, <span class="dt">breaks =</span> <span class="ot">NA</span>)
+<span class="kw">print</span>(p)</code></pre>
+<pre><code>## stat_bindot: binwidth defaulted to range/30. Use &#39;binwidth = x&#39; to adjust
+## this.</code></pre>
+<pre><code>## Warning: breaks = NA is deprecated. Please use breaks = NULL to remove
+## breaks in the scale. (Deprecated; last used in version 0.8.9)</code></pre>
+<figure>
+<img src="figure/unnamed-chunk-8.png" alt="plot of chunk unnamed-chunk-8" /><figcaption>plot of chunk unnamed-chunk-8</figcaption>
+</figure>
+<h3 id="model-the-aggregated-data">Model the aggregated data</h3>
+<pre class="sourceCode r"><code class="sourceCode r">m &lt;-<span class="st"> </span><span class="kw">lm</span>(Latency ~<span class="st"> </span>Version +<span class="st"> </span>EVT +<span class="st"> </span>Age, subject_means)
+<span class="kw">print</span>(<span class="kw">ascii</span>(<span class="kw">summary</span>(m)), <span class="st">&quot;pandoc&quot;</span>)</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: left;"><strong>Estimate</strong></th>
+<th style="text-align: left;"><strong>Std. Error</strong></th>
+<th style="text-align: left;"><strong>t value</strong></th>
+<th style="text-align: left;"><strong>Pr(&gt;|t|)</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">(Intercept)</td>
+<td style="text-align: left;">812.62</td>
+<td style="text-align: left;">90.99</td>
+<td style="text-align: left;">8.93</td>
+<td style="text-align: left;">0.00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">VersionCS2</td>
+<td style="text-align: left;">-7.99</td>
+<td style="text-align: left;">29.40</td>
+<td style="text-align: left;">-0.27</td>
+<td style="text-align: left;">0.79</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">EVT</td>
+<td style="text-align: left;">0.16</td>
+<td style="text-align: left;">1.03</td>
+<td style="text-align: left;">0.15</td>
+<td style="text-align: left;">0.88</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Age</td>
+<td style="text-align: left;">-2.04</td>
+<td style="text-align: left;">2.52</td>
+<td style="text-align: left;">-0.81</td>
+<td style="text-align: left;">0.42</td>
+</tr>
+</tbody>
+</table>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">qplot</span>(<span class="dt">data =</span> subject_means, <span class="dt">x =</span> EVT, <span class="dt">y =</span> Latency) +<span class="st"> </span><span class="kw">geom_smooth</span>(<span class="dt">method =</span> <span class="st">&quot;lm&quot;</span>) +<span class="st"> </span>
+<span class="st">    </span><span class="kw">labs</span>(<span class="dt">title =</span> <span class="st">&quot;By-Subject Reaction Times By EVT Raw Score&quot;</span>)</code></pre>
+<figure>
+<img src="figure/unnamed-chunk-91.png" alt="plot of chunk unnamed-chunk-9" /><figcaption>plot of chunk unnamed-chunk-9</figcaption>
+</figure>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">qplot</span>(<span class="dt">data =</span> subject_means, <span class="dt">x =</span> Age, <span class="dt">y =</span> Latency) +<span class="st"> </span><span class="kw">geom_smooth</span>(<span class="dt">method =</span> <span class="st">&quot;lm&quot;</span>) +<span class="st"> </span>
+<span class="st">    </span><span class="kw">labs</span>(<span class="dt">title =</span> <span class="st">&quot;By-Subject Reaction Times By Age in Months&quot;</span>)</code></pre>
+<figure>
+<img src="figure/unnamed-chunk-92.png" alt="plot of chunk unnamed-chunk-9" /><figcaption>plot of chunk unnamed-chunk-9</figcaption>
+</figure>
+<h3 id="check-the-model-assumptions">Check the model assumptions</h3>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(<span class="kw">gvlma</span>(m))</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = Latency ~ Version + EVT + Age, data = subject_means)
+## 
+## Coefficients:
+## (Intercept)   VersionCS2          EVT          Age  
+##      812.62        -7.99         0.16        -2.04  
+## 
+## 
+## ASSESSMENT OF THE LINEAR MODEL ASSUMPTIONS
+## USING THE GLOBAL TEST ON 4 DEGREES-OF-FREEDOM:
+## Level of Significance =  0.05 
+## 
+## Call:
+##  gvlma(x = m) 
+## 
+##                       Value  p-value                   Decision
+## Global Stat        19.13791 0.000738 Assumptions NOT satisfied!
+## Skewness            1.47683 0.224271    Assumptions acceptable.
+## Kurtosis            3.99656 0.045593 Assumptions NOT satisfied!
+## Link Function       0.00376 0.951123    Assumptions acceptable.
+## Heteroscedasticity 13.66077 0.000219 Assumptions NOT satisfied!</code></pre>
+<p>I need to find a transformation or a link function better suited for the distribution of these data.</p>
 </body>
 </html>
