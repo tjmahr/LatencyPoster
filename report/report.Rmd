@@ -7,8 +7,18 @@ Reaction times provide valuable information about the real-time processing of sp
 
 In this study, we modified the LWL paradigm to include an animated centering stimulus in order to increase the number of trials with meaningful reaction time data. We hypothesized that the orienting animations will increase the "quality" of the eye-tracking data but may also introduce additional task demands that hinder response time and reduce accuracy. 
 
+## Methods
 
+### Participants
+The participants were fifty 30-- to 48-month-old children, 25 per condition (with and without the central fixation point). All participants passed a hearing screening and had age-appropriate speech and language, according to parent report. 
 
+### Procedure
+A 2AFC mispronunciation experiment was used in condition. In this experiment, children saw pictures of a familiar and an unfamiliar object and heard three types of stimuli in a carrier phrase: familiar real words, one-feature mispronunciations (_dog_ vs. _tog_), and nonwords (/veif/).  Children also received an expressive vocabulary test (EVT-2, Williams, 2007).
+
+### Statistical Analysis
+The log-odds of looking to the familiar object was the dependent variable.  We used a growth curve model to model how children’s eye gaze patterns were related to their expressive vocabulary size (Mirman et al., 2008)
+
+## Results and Discussion
 
 
 
@@ -20,18 +30,34 @@ In this study, we modified the LWL paradigm to include an animated centering sti
 
 *** 
 
+## Scratch area for testing things out
 
-@BaayenRTs recommend blah blah blah.
+**Ciations**
 
-We try the inverse-normal distribution [@BaayenRTs],
+* @BaayenRTs recommend blah blah blah.
+* We try the inverse-normal distribution [@BaayenRTs],
 
-You can also embed plots, for example:
+**Embed an image!**
 
-```{r fig.width=7, fig.height=6}
+```{r fig.width=7, fig.height=6, fig.cap=c('Test image')}
 plot(cars)
 ```
 
+**Tables?**
+
+Use the `ascii` package to make a captioned Pandoc table:
+
+```{r, results ='asis', warning=FALSE}
+library(ascii)
+data(esoph)
+print(ascii(esoph[1:10,]), type = "pandoc")
+```
+Table: This is a table caption.
+
+
+
+
+
+
 
 ## References
-
-
