@@ -24,40 +24,4 @@ The log-odds of looking to the familiar object was the dependent variable.  We u
 
 
 
-
-
-
-
-*** 
-
-## Scratch area for testing things out
-
-**Ciations**
-
-* @BaayenRTs recommend blah blah blah.
-* We try the inverse-normal distribution [@BaayenRTs],
-
-**Embed an image!**
-
-```{r fig.width=7, fig.height=6, fig.cap=c('Test image')}
-plot(cars)
-```
-
-**Tables?**
-
-Use the `ascii` package to make a captioned Pandoc table:
-
-```{r, results ='asis', warning=FALSE}
-library(ascii)
-data(esoph)
-print(ascii(esoph[1:10,]), type = "pandoc")
-```
-Table: This is a table caption.
-
-
-
-
-
-
-
 ## References

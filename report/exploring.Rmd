@@ -1,0 +1,112 @@
+## Get the data ready
+
+Load the trial-by-trial data.
+
+```{r, results='hide', message=FALSE, warning=FALSE}
+setwd("../")
+source('01_functions.r', chdir = TRUE)
+load("data/clean.RData")
+within_ms <- 50
+```
+
+### Compute the latencies. 
+
+Within the first `r within_ms` ms of target-onset, the subject must be:
+
+* Not looking to the target word
+* Looking on the screen
+
+```{r, cache=TRUE}
+onset_window <- DefineOnsetWindow(starting_time = 0, window_duration = within_ms)
+CalculateRealLatency <- MakeLatencyCalculator(onset_window, "Target")
+results <- ddply(clean, ~ Subject + TrialNo, CalculateRealLatency)
+# Combine two versions of Cross-sectional2 into same grouping factor
+results$Version <- factor(ifelse(results$Group == "CS1", "CS1", "CS2"))
+```
+
+
+
+
+## Look at the raw latency data
+
+```{r, warning=FALSE, results='asis'}
+descriptives <- describeBy(results$Latency, group=results$Version, mat=T, skew=F)
+rownames(descriptives) <- c("CS1", "CS2")
+# Convert to a dataframe for table-printing
+descriptives <- t(descriptives)[-c(1:3), ]
+descriptives <- as.data.frame(descriptives)
+print(ascii(descriptives), type = "pandoc")
+```
+
+These means are very close! Let's look at the histograms.
+
+```{r, fig.width=7, fig.height=6, fig.cap=c('Histograms of untrimmed latencies')}
+qplot(data = results, x = Latency) + scale_x_continuous(breaks = (0:5 * 500)) + 
+  facet_grid(Version ~ .)
+```
+
+Look at the number of NA latencies in each version of the experiment.
+
+```{r, message=FALSE, warning=FALSE, results='asis'}
+library(reshape2)
+results$NotNA <- ifelse(is.na(results$Latency), 0, 1)
+not_na <- dcast(results, Version ~ NotNA, value.var = "NotNA")
+names(not_na) <- c("Version", "NA Latencies", "Real Latencies")
+print(ascii(not_na), type = "pandoc")
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+*** 
+
+## Scratch area for testing things out
+
+**Ciations**
+
+* @BaayenRTs recommend blah blah blah.
+* We try the inverse-normal distribution [@BaayenRTs],
+
+**Tables?**
+
+Use the `ascii` package to make a captioned Pandoc table:
+
+```{r, results ='asis', warning=FALSE}
+library(ascii)
+data(esoph)
+print(ascii(esoph[1:10,]), type = "pandoc")
+```
+Table: This is a table caption.
+
+## References

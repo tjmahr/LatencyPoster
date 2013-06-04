@@ -1,0 +1,7 @@
+s: 
+mathjax: 
+format: html5
+o: exploring-out.html
+  
+format: markdown_github
+o: exploring-out.md

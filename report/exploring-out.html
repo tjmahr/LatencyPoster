@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="pandoc">
+  <title></title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <!--[if lt IE 9]>
+    <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+  <style type="text/css">
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; }
+code > span.dt { color: #902000; }
+code > span.dv { color: #40a070; }
+code > span.bn { color: #40a070; }
+code > span.fl { color: #40a070; }
+code > span.ch { color: #4070a0; }
+code > span.st { color: #4070a0; }
+code > span.co { color: #60a0b0; font-style: italic; }
+code > span.ot { color: #007020; }
+code > span.al { color: #ff0000; font-weight: bold; }
+code > span.fu { color: #06287e; }
+code > span.er { color: #ff0000; font-weight: bold; }
+  </style>
+</head>
+<body>
+<h2 id="get-the-data-ready">Get the data ready</h2>
+<p>Load the trial-by-trial data.</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">setwd</span>(<span class="st">&quot;../&quot;</span>)
+<span class="kw">source</span>(<span class="st">&quot;01_functions.r&quot;</span>, <span class="dt">chdir =</span> <span class="ot">TRUE</span>)
+<span class="kw">load</span>(<span class="st">&quot;data/clean.RData&quot;</span>)
+within_ms &lt;-<span class="st"> </span><span class="dv">50</span></code></pre>
+<h3 id="compute-the-latencies.">Compute the latencies.</h3>
+<p>Within the first 50 ms of target-onset, the subject must be:</p>
+<ul>
+<li>Not looking to the target word</li>
+<li>Looking on the screen</li>
+</ul>
+<pre class="sourceCode r"><code class="sourceCode r">onset_window &lt;-<span class="st"> </span><span class="kw">DefineOnsetWindow</span>(<span class="dt">starting_time =</span> <span class="dv">0</span>, <span class="dt">window_duration =</span> within_ms)
+CalculateRealLatency &lt;-<span class="st"> </span><span class="kw">MakeLatencyCalculator</span>(onset_window, <span class="st">&quot;Target&quot;</span>)
+results &lt;-<span class="st"> </span><span class="kw">ddply</span>(clean, ~Subject +<span class="st"> </span>TrialNo, CalculateRealLatency)
+<span class="co"># Combine two versions of Cross-sectional2 into same grouping factor</span>
+results$Version &lt;-<span class="st"> </span><span class="kw">factor</span>(<span class="kw">ifelse</span>(results$Group ==<span class="st"> &quot;CS1&quot;</span>, <span class="st">&quot;CS1&quot;</span>, <span class="st">&quot;CS2&quot;</span>))</code></pre>
+<h2 id="look-at-the-raw-latency-data">Look at the raw latency data</h2>
+<pre class="sourceCode r"><code class="sourceCode r">descriptives &lt;-<span class="st"> </span><span class="kw">describeBy</span>(results$Latency, <span class="dt">group =</span> results$Version, <span class="dt">mat =</span> T, 
+    <span class="dt">skew =</span> F)
+<span class="kw">rownames</span>(descriptives) &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;CS1&quot;</span>, <span class="st">&quot;CS2&quot;</span>)
+<span class="co"># Convert to a dataframe for table-printing</span>
+descriptives &lt;-<span class="st"> </span><span class="kw">t</span>(descriptives)[-<span class="kw">c</span>(<span class="dv">1</span>:<span class="dv">3</span>), ]
+descriptives &lt;-<span class="st"> </span><span class="kw">as.data.frame</span>(descriptives)
+<span class="kw">print</span>(<span class="kw">ascii</span>(descriptives), <span class="dt">type =</span> <span class="st">&quot;pandoc&quot;</span>)</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: left;"><strong>CS1</strong></th>
+<th style="text-align: left;"><strong>CS2</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">n</td>
+<td style="text-align: left;">397</td>
+<td style="text-align: left;">644</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">mean</td>
+<td style="text-align: left;">755.0</td>
+<td style="text-align: left;">754.3</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sd</td>
+<td style="text-align: left;">457.6</td>
+<td style="text-align: left;">485.5</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">median</td>
+<td style="text-align: left;">682.8</td>
+<td style="text-align: left;">616.2</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">trimmed</td>
+<td style="text-align: left;">700.4</td>
+<td style="text-align: left;">689.5</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">mad</td>
+<td style="text-align: left;">345.7</td>
+<td style="text-align: left;">370.4</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">min</td>
+<td style="text-align: left;">66.62</td>
+<td style="text-align: left;">66.62</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">max</td>
+<td style="text-align: left;">2498</td>
+<td style="text-align: left;">2482</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">range</td>
+<td style="text-align: left;">2432</td>
+<td style="text-align: left;">2415</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">se</td>
+<td style="text-align: left;">22.96</td>
+<td style="text-align: left;">19.13</td>
+</tr>
+</tbody>
+</table>
+<p>These means are very close! Let's look at the histograms.</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">qplot</span>(<span class="dt">data =</span> results, <span class="dt">x =</span> Latency) +<span class="st"> </span><span class="kw">scale_x_continuous</span>(<span class="dt">breaks =</span> (<span class="dv">0</span>:<span class="dv">5</span> *<span class="st"> </span><span class="dv">500</span>)) +<span class="st"> </span>
+<span class="st">    </span><span class="kw">facet_grid</span>(Version ~<span class="st"> </span>.)</code></pre>
+<pre><code>## stat_bin: binwidth defaulted to range/30. Use &#39;binwidth = x&#39; to adjust
+## this.</code></pre>
+<pre><code>## stat_bin: binwidth defaulted to range/30. Use &#39;binwidth = x&#39; to adjust
+## this.</code></pre>
+<figure>
+<img src="figure/unnamed-chunk-4.png" alt="Histograms of untrimmed latencies" /><figcaption>Histograms of untrimmed latencies</figcaption>
+</figure>
+<p>Look at the number of NA latencies in each version of the experiment.</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(reshape2)
+results$NotNA &lt;-<span class="st"> </span><span class="kw">ifelse</span>(<span class="kw">is.na</span>(results$Latency), <span class="dv">0</span>, <span class="dv">1</span>)
+not_na &lt;-<span class="st"> </span><span class="kw">dcast</span>(results, Version ~<span class="st"> </span>NotNA, <span class="dt">value.var =</span> <span class="st">&quot;NotNA&quot;</span>)
+<span class="kw">names</span>(not_na) &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;Version&quot;</span>, <span class="st">&quot;NA Latencies&quot;</span>, <span class="st">&quot;Real Latencies&quot;</span>)
+<span class="kw">print</span>(<span class="kw">ascii</span>(not_na), <span class="dt">type =</span> <span class="st">&quot;pandoc&quot;</span>)</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: left;"><strong>Version</strong></th>
+<th style="text-align: left;"><strong>NA Latencies</strong></th>
+<th style="text-align: left;"><strong>Real Latencies</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">1</td>
+<td style="text-align: left;">CS1</td>
+<td style="text-align: left;">827.00</td>
+<td style="text-align: left;">397.00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">2</td>
+<td style="text-align: left;">CS2</td>
+<td style="text-align: left;">376.00</td>
+<td style="text-align: left;">644.00</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="scratch-area-for-testing-things-out">Scratch area for testing things out</h2>
+<p><strong>Ciations</strong></p>
+<ul>
+<li>@BaayenRTs recommend blah blah blah.</li>
+<li>We try the inverse-normal distribution [@BaayenRTs],</li>
+</ul>
+<p><strong>Tables?</strong></p>
+<p>Use the <code>ascii</code> package to make a captioned Pandoc table:</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(ascii)
+<span class="kw">data</span>(esoph)
+<span class="kw">print</span>(<span class="kw">ascii</span>(esoph[<span class="dv">1</span>:<span class="dv">10</span>, ]), <span class="dt">type =</span> <span class="st">&quot;pandoc&quot;</span>)</code></pre>
+<table>
+<caption>This is a table caption.</caption>
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: left;"><strong>agegp</strong></th>
+<th style="text-align: left;"><strong>alcgp</strong></th>
+<th style="text-align: left;"><strong>tobgp</strong></th>
+<th style="text-align: left;"><strong>ncases</strong></th>
+<th style="text-align: left;"><strong>ncontrols</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">1</td>
+<td style="text-align: left;">25-34</td>
+<td style="text-align: left;">0-39g/day</td>
+<td style="text-align: left;">0-9g/day</td>
+<td style="text-align: left;">0.00</td>
+<td style="text-align: left;">40.00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">2</td>
+<td style="text-align: left;">25-34</td>
+<td style="text-align: left;">0-39g/day</td>
+<td style="text-align: left;">10-19</td>
+<td style="text-align: left;">0.00</td>
+<td style="text-align: left;">10.00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">3</td>
+<td style="text-align: left;">25-34</td>
+<td style="text-align: left;">0-39g/day</td>
+<td style="text-align: left;">20-29</td>
+<td style="text-align: left;">0.00</td>
+<td style="text-align: left;">6.00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">4</td>
+<td style="text-align: left;">25-34</td>
+<td style="text-align: left;">0-39g/day</td>
+<td style="text-align: left;">30+</td>
+<td style="text-align: left;">0.00</td>
+<td style="text-align: left;">5.00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">5</td>
+<td style="text-align: left;">25-34</td>
+<td style="text-align: left;">40-79</td>
+<td style="text-align: left;">0-9g/day</td>
+<td style="text-align: left;">0.00</td>
+<td style="text-align: left;">27.00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">6</td>
+<td style="text-align: left;">25-34</td>
+<td style="text-align: left;">40-79</td>
+<td style="text-align: left;">10-19</td>
+<td style="text-align: left;">0.00</td>
+<td style="text-align: left;">7.00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">7</td>
+<td style="text-align: left;">25-34</td>
+<td style="text-align: left;">40-79</td>
+<td style="text-align: left;">20-29</td>
+<td style="text-align: left;">0.00</td>
+<td style="text-align: left;">4.00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">8</td>
+<td style="text-align: left;">25-34</td>
+<td style="text-align: left;">40-79</td>
+<td style="text-align: left;">30+</td>
+<td style="text-align: left;">0.00</td>
+<td style="text-align: left;">7.00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">9</td>
+<td style="text-align: left;">25-34</td>
+<td style="text-align: left;">80-119</td>
+<td style="text-align: left;">0-9g/day</td>
+<td style="text-align: left;">0.00</td>
+<td style="text-align: left;">2.00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">10</td>
+<td style="text-align: left;">25-34</td>
+<td style="text-align: left;">80-119</td>
+<td style="text-align: left;">10-19</td>
+<td style="text-align: left;">0.00</td>
+<td style="text-align: left;">1.00</td>
+</tr>
+</tbody>
+</table>
+<h2 id="references">References</h2>
+</body>
+</html>

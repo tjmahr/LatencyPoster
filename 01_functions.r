@@ -4,6 +4,8 @@ library(plyr)
 library(lubridate)
 library(ggplot2)
 library(lme4)
+library(ascii)
+library(psych)
 
 #### Functions for handling LWL data ------------------------------------------
 

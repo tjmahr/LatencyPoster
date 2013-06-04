@@ -28,51 +28,8 @@ The log-odds of looking to the familiar object was the dependent variable. We us
 Results and Discussion
 ----------------------
 
-* * * * *
-
-Scratch area for testing things out
------------------------------------
-
-**Ciations**
-
--   Baayen & Milin (2010) recommend blah blah blah.
--   We try the inverse-normal distribution (Baayen & Milin, 2010),
-
-**Embed an image!**
-
-~~~~ {.r}
-plot(cars)
-~~~~
-
-![Test image](figure/unnamed-chunk-1.png)
-
-**Tables?**
-
-Use the `ascii` package to make a captioned Pandoc table:
-
-~~~~ {.r}
-library(ascii)
-data(esoph)
-print(ascii(esoph[1:10, ]), type = "pandoc")
-~~~~
-
-||**agegp**|**alcgp**|**tobgp**|**ncases**|**ncontrols**|
-|---|:--------|:--------|:--------|:---------|:------------|
-|1|25-34|0-39g/day|0-9g/day|0.00|40.00|
-|2|25-34|0-39g/day|10-19|0.00|10.00|
-|3|25-34|0-39g/day|20-29|0.00|6.00|
-|4|25-34|0-39g/day|30+|0.00|5.00|
-|5|25-34|40-79|0-9g/day|0.00|27.00|
-|6|25-34|40-79|10-19|0.00|7.00|
-|7|25-34|40-79|20-29|0.00|4.00|
-|8|25-34|40-79|30+|0.00|7.00|
-|9|25-34|80-119|0-9g/day|0.00|2.00|
-|10|25-34|80-119|10-19|0.00|1.00|
-
 References
 ----------
-
-Baayen, R. H., & Milin, P. (2010). Analysing Reaction Times. *International Journal of Psychological Research*, *3*(2), 12–28.
 
 Fernald, A., Swingley, D., & Pinto, J. P. (2001). When Half a Word Is Enough: Infants Can Recognize Spoken Words Using Partial Phonetic Information. *Child Development*, *72*(4), 1003–1015. doi:10.1111/1467-8624.00331
 
