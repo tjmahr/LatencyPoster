@@ -337,7 +337,7 @@ p &lt;-<span class="st"> </span><span class="kw">ggplot</span>(subject_means, <s
 </figure>
 <h3 id="model-the-aggregated-data">Model the aggregated data</h3>
 <pre class="sourceCode r"><code class="sourceCode r">m &lt;-<span class="st"> </span><span class="kw">lm</span>(Latency ~<span class="st"> </span>Version +<span class="st"> </span>EVT +<span class="st"> </span>Age, subject_means)
-<span class="kw">print</span>(<span class="kw">ascii</span>(<span class="kw">summary</span>(m)), <span class="st">&quot;pandoc&quot;</span>)</code></pre>
+<span class="kw">print</span>(<span class="kw">ascii</span>(<span class="kw">summary</span>(m)), <span class="dt">type =</span> <span class="st">&quot;pandoc&quot;</span>)</code></pre>
 <table>
 <thead>
 <tr class="header">
@@ -381,13 +381,17 @@ p &lt;-<span class="st"> </span><span class="kw">ggplot</span>(subject_means, <s
 </table>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">qplot</span>(<span class="dt">data =</span> subject_means, <span class="dt">x =</span> EVT, <span class="dt">y =</span> Latency) +<span class="st"> </span><span class="kw">geom_smooth</span>(<span class="dt">method =</span> <span class="st">&quot;lm&quot;</span>) +<span class="st"> </span>
 <span class="st">    </span><span class="kw">labs</span>(<span class="dt">title =</span> <span class="st">&quot;By-Subject Reaction Times By EVT Raw Score&quot;</span>)</code></pre>
+<pre><code>## Warning: Removed 1 rows containing missing values (stat_smooth).</code></pre>
+<pre><code>## Warning: Removed 1 rows containing missing values (geom_point).</code></pre>
 <figure>
-<img src="figure/unnamed-chunk-91.png" alt="plot of chunk unnamed-chunk-9" /><figcaption>plot of chunk unnamed-chunk-9</figcaption>
+<img src="figure/unnamed-chunk-101.png" alt="plot of chunk unnamed-chunk-10" /><figcaption>plot of chunk unnamed-chunk-10</figcaption>
 </figure>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">qplot</span>(<span class="dt">data =</span> subject_means, <span class="dt">x =</span> Age, <span class="dt">y =</span> Latency) +<span class="st"> </span><span class="kw">geom_smooth</span>(<span class="dt">method =</span> <span class="st">&quot;lm&quot;</span>) +<span class="st"> </span>
 <span class="st">    </span><span class="kw">labs</span>(<span class="dt">title =</span> <span class="st">&quot;By-Subject Reaction Times By Age in Months&quot;</span>)</code></pre>
+<pre><code>## Warning: Removed 1 rows containing missing values (stat_smooth).</code></pre>
+<pre><code>## Warning: Removed 1 rows containing missing values (geom_point).</code></pre>
 <figure>
-<img src="figure/unnamed-chunk-92.png" alt="plot of chunk unnamed-chunk-9" /><figcaption>plot of chunk unnamed-chunk-9</figcaption>
+<img src="figure/unnamed-chunk-102.png" alt="plot of chunk unnamed-chunk-10" /><figcaption>plot of chunk unnamed-chunk-10</figcaption>
 </figure>
 <h3 id="check-the-model-assumptions">Check the model assumptions</h3>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(<span class="kw">gvlma</span>(m))</code></pre>

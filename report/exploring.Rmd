@@ -86,7 +86,10 @@ print(p)
 
 ```{r, warning=FALSE, results='asis'}
 m <- lm(Latency ~ Version + EVT + Age, subject_means)
-print(ascii(summary(m)), "pandoc")
+print(ascii(summary(m)), type = "pandoc")
+```
+
+```{r}
 qplot(data = subject_means, x = EVT, y = Latency) + 
   geom_smooth(method = "lm") + 
   labs(title = "By-Subject Reaction Times By EVT Raw Score")
@@ -94,6 +97,7 @@ qplot(data = subject_means, x = Age, y = Latency) +
   geom_smooth(method = "lm") + 
   labs(title = "By-Subject Reaction Times By Age in Months")
 ```
+
 
 ### Check the model assumptions
 

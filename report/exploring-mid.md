@@ -196,7 +196,7 @@ print(p)
 
 ```r
 m <- lm(Latency ~ Version + EVT + Age, subject_means)
-print(ascii(summary(m)), "pandoc")
+print(ascii(summary(m)), type = "pandoc")
 ```
 
               **Estimate**   **Std. Error**   **t value**   **Pr(>|t|)**  
@@ -207,19 +207,38 @@ EVT           0.16           1.03             0.15          0.88
 Age           -2.04          2.52             -0.81         0.42          
 ------------- -------------- ---------------- ------------- --------------
 
+
+
 ```r
 qplot(data = subject_means, x = EVT, y = Latency) + geom_smooth(method = "lm") + 
     labs(title = "By-Subject Reaction Times By EVT Raw Score")
 ```
 
-![plot of chunk unnamed-chunk-9](figure/unnamed-chunk-91.png) 
+```
+## Warning: Removed 1 rows containing missing values (stat_smooth).
+```
+
+```
+## Warning: Removed 1 rows containing missing values (geom_point).
+```
+
+![plot of chunk unnamed-chunk-10](figure/unnamed-chunk-101.png) 
 
 ```r
 qplot(data = subject_means, x = Age, y = Latency) + geom_smooth(method = "lm") + 
     labs(title = "By-Subject Reaction Times By Age in Months")
 ```
 
-![plot of chunk unnamed-chunk-9](figure/unnamed-chunk-92.png) 
+```
+## Warning: Removed 1 rows containing missing values (stat_smooth).
+```
+
+```
+## Warning: Removed 1 rows containing missing values (geom_point).
+```
+
+![plot of chunk unnamed-chunk-10](figure/unnamed-chunk-102.png) 
+
 
 
 ### Check the model assumptions
