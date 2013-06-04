@@ -196,7 +196,8 @@ print(p)
 
 ```r
 m <- lm(Latency ~ Version + EVT + Age, subject_means)
-print(ascii(summary(m)), type = "pandoc")
+
+print(ascii(m), type = "pandoc")
 ```
 
               **Estimate**   **Std. Error**   **t value**   **Pr(>|t|)**  

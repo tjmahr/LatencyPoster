@@ -337,7 +337,8 @@ p &lt;-<span class="st"> </span><span class="kw">ggplot</span>(subject_means, <s
 </figure>
 <h3 id="model-the-aggregated-data">Model the aggregated data</h3>
 <pre class="sourceCode r"><code class="sourceCode r">m &lt;-<span class="st"> </span><span class="kw">lm</span>(Latency ~<span class="st"> </span>Version +<span class="st"> </span>EVT +<span class="st"> </span>Age, subject_means)
-<span class="kw">print</span>(<span class="kw">ascii</span>(<span class="kw">summary</span>(m)), <span class="dt">type =</span> <span class="st">&quot;pandoc&quot;</span>)</code></pre>
+
+<span class="kw">print</span>(<span class="kw">ascii</span>(m), <span class="dt">type =</span> <span class="st">&quot;pandoc&quot;</span>)</code></pre>
 <table>
 <thead>
 <tr class="header">
