@@ -1,13 +1,17 @@
 library(xlsx)
+library(ascii)
 library(stringr)
+
+library(reshape2)
 library(plyr)
 library(lubridate)
 library(ggplot2)
+
 library(lme4)
-library(ascii)
 library(psych)
-library(reshape2)
 library(lmSupport)
+library(retimes)
+
 
 #### Functions for handling LWL data ------------------------------------------
 
@@ -19,6 +23,7 @@ LoadAllMPData <- function(subject_paths) {
   trial_frame <- ldply(trials, MakeLongTrial)
   
   # Make subjects a factor
+  trial_frame$Gender <- str_extract(trial_frame$Subject, "^[MF]")
   trial_frame$Subject <- str_extract(trial_frame$Subject, "^[0-9]{3}")
   trial_frame$Subject <- factor(trial_frame$Subject)
   trial_frame
@@ -41,8 +46,10 @@ MakeLongTrial <- function(trial, columns = c("GazeByImageAOI", "XMean.Target")) 
   trial_frame
 }
 
-ListFoldersInGazeDir <- function(gaze_dir) {
+ListFoldersInGazeDir <- function(gaze_dir, select) {
   subjects <- list.files(gaze_dir, pattern = "^[0-9]{3}[CLP]")
+  short_names <- str_extract(subjects, pattern = "^[0-9]{3}[CLP]")
+  subjects <- subjects[short_names %in% selected]
   paste0(gaze_dir, "/", subjects)
 }
 
