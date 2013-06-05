@@ -31,22 +31,23 @@ code > span.er { color: #ff0000; font-weight: bold; }
 <body>
 <h1 id="exploring-the-latency-data">Exploring the latency data</h1>
 <p>This <code>Rmd</code> file is where I try to figure out what's going on in the data.</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Latency data</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Load the latency data</span>
 <span class="kw">setwd</span>(<span class="st">&quot;../&quot;</span>)
 <span class="kw">source</span>(<span class="st">&quot;R/01_functions.r&quot;</span>, <span class="dt">chdir =</span> <span class="ot">TRUE</span>)
 <span class="kw">load</span>(<span class="st">&quot;data/results.RData&quot;</span>)</code></pre>
-<h2 id="look-at-the-untrimmed-latency-data">Look at the untrimmed latency data</h2>
-<pre class="sourceCode r"><code class="sourceCode r">PrintDescriptives &lt;-<span class="st"> </span>function(results) {
-    descriptives &lt;-<span class="st"> </span><span class="kw">describeBy</span>(results$Latency, <span class="dt">group =</span> results$Version, <span class="dt">mat =</span> T, 
-        <span class="dt">skew =</span> F)
-    <span class="kw">rownames</span>(descriptives) &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;CS1&quot;</span>, <span class="st">&quot;CS2&quot;</span>)
-    <span class="co"># Convert to a dataframe for table-printing</span>
-    descriptives &lt;-<span class="st"> </span><span class="kw">t</span>(descriptives)[-<span class="kw">c</span>(<span class="dv">1</span>:<span class="dv">3</span>), ]
-    descriptives &lt;-<span class="st"> </span><span class="kw">as.data.frame</span>(descriptives)
-    <span class="kw">print</span>(<span class="kw">ascii</span>(descriptives), <span class="dt">type =</span> <span class="st">&quot;pandoc&quot;</span>)
-}
+<h2 id="reponses-to-jes-email">Reponses to JE's email:</h2>
+<h3 id="for-methods-can-you-write-bullet-points-on-how-we-calculated-latencies"><em>For methods, can you write bullet points on how we calculated latencies?</em></h3>
+<p>Reaction times measure the latency between looking to the distractor image and shifting the gaze towards the target image after the onset of the target word. The following conditions were required for the latency calculation:</p>
+<ul>
+<li>During the first 50 ms of the target word, the child had to be looking onscreen, but not at the target image.</li>
+<li>The first look to the target must occur afte 250r ms. (That is, shifts of looks towards the target before 250 ms were considered too fast to be deliberate responses to the target word.)</li>
+</ul>
+<h3 id="after-trimming-what-of-trials-had-latencies-in-cs1-in-cs2-are-there-more-trials-with-latencies-in-cs2-compared-to-cs1-after-trimming-as-there-were-before-trimming"><em>After trimming, what % of trials had latencies in CS1? In CS2? Are there more trials with latencies in CS2 compared to CS1 after trimming, as there were before trimming?</em></h3>
+<p>Here are the summary stats for the unadjusted values. First, we remove subjects who have been designated as non-keepers. We also remove subjects who were tested with the AAE dialect stimuli, since those audio stimuli were not the same duration.</p>
+<pre class="sourceCode r"><code class="sourceCode r">results &lt;-<span class="st"> </span><span class="kw">subset</span>(results, <span class="kw">is.na</span>(Keeper) &amp;<span class="st"> </span>Dialect ==<span class="st"> &quot;SAE&quot;</span>)
 <span class="kw">PrintDescriptives</span>(results)</code></pre>
 <table>
+<caption>Descriptives for unadjusted latency values</caption>
 <thead>
 <tr class="header">
 <th style="text-align: left;"></th>
@@ -57,28 +58,28 @@ code > span.er { color: #ff0000; font-weight: bold; }
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">n</td>
-<td style="text-align: left;">397</td>
-<td style="text-align: left;">644</td>
+<td style="text-align: left;">285</td>
+<td style="text-align: left;">579</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">mean</td>
-<td style="text-align: left;">755.0</td>
-<td style="text-align: left;">754.3</td>
+<td style="text-align: left;">756.8</td>
+<td style="text-align: left;">752.1</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">sd</td>
-<td style="text-align: left;">457.6</td>
-<td style="text-align: left;">485.5</td>
+<td style="text-align: left;">451.1</td>
+<td style="text-align: left;">484.7</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">median</td>
-<td style="text-align: left;">682.8</td>
+<td style="text-align: left;">699.5</td>
 <td style="text-align: left;">616.2</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">trimmed</td>
-<td style="text-align: left;">700.4</td>
-<td style="text-align: left;">689.5</td>
+<td style="text-align: left;">702.5</td>
+<td style="text-align: left;">687.8</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">mad</td>
@@ -102,88 +103,95 @@ code > span.er { color: #ff0000; font-weight: bold; }
 </tr>
 <tr class="even">
 <td style="text-align: left;">se</td>
-<td style="text-align: left;">22.96</td>
-<td style="text-align: left;">19.13</td>
+<td style="text-align: left;">26.72</td>
+<td style="text-align: left;">20.14</td>
 </tr>
 </tbody>
 </table>
-<p>These means are very close! Let's look at the histograms.</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">qplot</span>(<span class="dt">data =</span> results, <span class="dt">x =</span> Latency) +<span class="st"> </span><span class="kw">scale_x_continuous</span>(<span class="dt">breaks =</span> (<span class="dv">0</span>:<span class="dv">5</span> *<span class="st"> </span><span class="dv">500</span>)) +<span class="st"> </span>
-<span class="st">    </span><span class="kw">facet_grid</span>(Version ~<span class="st"> </span>.)</code></pre>
-<pre><code>## stat_bin: binwidth defaulted to range/30. Use &#39;binwidth = x&#39; to adjust
-## this.</code></pre>
-<pre><code>## stat_bin: binwidth defaulted to range/30. Use &#39;binwidth = x&#39; to adjust
-## this.</code></pre>
-<figure>
-<img src="figure/unnamed-chunk-3.png" alt="Histograms of untrimmed latencies" /><figcaption>Histograms of untrimmed latencies</figcaption>
-</figure>
-<p>Look at the number of NA latencies in each version of the experiment. There is probably a significant effect of group on the odds of obtaining a latency.</p>
-<pre class="sourceCode r"><code class="sourceCode r">results$NotNA &lt;-<span class="st"> </span><span class="kw">ifelse</span>(<span class="kw">is.na</span>(results$Latency), <span class="dv">0</span>, <span class="dv">1</span>)
-not_na &lt;-<span class="st"> </span><span class="kw">dcast</span>(results, Version ~<span class="st"> </span>NotNA, <span class="dt">value.var =</span> <span class="st">&quot;NotNA&quot;</span>)
-<span class="kw">names</span>(not_na) &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;Version&quot;</span>, <span class="st">&quot;Number NA Latencies&quot;</span>, <span class="st">&quot;Number Real Latencies&quot;</span>)
-<span class="kw">print</span>(<span class="kw">ascii</span>(not_na), <span class="dt">type =</span> <span class="st">&quot;pandoc&quot;</span>)</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">ComputePercentNA</span>(results)</code></pre>
 <table>
+<caption>Response rates for the experiment versions, before trimming.</caption>
 <thead>
 <tr class="header">
 <th style="text-align: left;"></th>
 <th style="text-align: left;"><strong>Version</strong></th>
-<th style="text-align: left;"><strong>Number NA Latencies</strong></th>
-<th style="text-align: left;"><strong>Number Real Latencies</strong></th>
+<th style="text-align: left;"><strong>NA Latencies</strong></th>
+<th style="text-align: left;"><strong>Real Latencies</strong></th>
+<th style="text-align: left;"><strong>Percent NA</strong></th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">1</td>
 <td style="text-align: left;">CS1</td>
-<td style="text-align: left;">827.00</td>
-<td style="text-align: left;">397.00</td>
+<td style="text-align: left;">567.00</td>
+<td style="text-align: left;">285.00</td>
+<td style="text-align: left;">66.55</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">2</td>
 <td style="text-align: left;">CS2</td>
-<td style="text-align: left;">376.00</td>
-<td style="text-align: left;">644.00</td>
+<td style="text-align: left;">345.00</td>
+<td style="text-align: left;">579.00</td>
+<td style="text-align: left;">37.34</td>
 </tr>
 </tbody>
 </table>
-<h2 id="trim-off-fast-and-slow-latencies">Trim off fast and slow latencies</h2>
-<p>Trim off the impossibly fast latencies (i.e., less than 250 ms.)</p>
-<pre class="sourceCode r"><code class="sourceCode r">results$TooFast &lt;-<span class="st"> </span><span class="kw">round</span>(results$Latency) &lt;<span class="st"> </span><span class="dv">250</span>
-<span class="co"># How many latencies were too fast within each group</span>
-too_fast &lt;-<span class="st"> </span><span class="kw">dcast</span>(results, Version ~<span class="st"> </span>TooFast)
-<span class="kw">names</span>(too_fast) &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;Version&quot;</span>, <span class="st">&quot;Number &gt; 250 ms&quot;</span>, <span class="st">&quot;Number &lt; 250 ms&quot;</span>, <span class="st">&quot;Number NA&quot;</span>)
-<span class="kw">print</span>(<span class="kw">ascii</span>(too_fast), <span class="dt">type =</span> <span class="st">&quot;pandoc&quot;</span>)</code></pre>
+<p>Now we trim of the too-fast values using 250 ms as the cut-off.</p>
+<pre class="sourceCode r"><code class="sourceCode r">results &lt;-<span class="st"> </span><span class="kw">TrimTooFast</span>(results, <span class="dt">cutoff =</span> <span class="dv">250</span>)</code></pre>
 <table>
 <thead>
 <tr class="header">
 <th style="text-align: left;"></th>
 <th style="text-align: left;"><strong>Version</strong></th>
-<th style="text-align: left;"><strong>Number &gt; 250 ms</strong></th>
-<th style="text-align: left;"><strong>Number &lt; 250 ms</strong></th>
-<th style="text-align: left;"><strong>Number NA</strong></th>
+<th style="text-align: left;"><strong>Num &gt; 250 ms</strong></th>
+<th style="text-align: left;"><strong>Num &lt; 250 ms</strong></th>
+<th style="text-align: left;"><strong>Num NA</strong></th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">1</td>
 <td style="text-align: left;">CS1</td>
-<td style="text-align: left;">361.00</td>
-<td style="text-align: left;">36.00</td>
-<td style="text-align: left;">827.00</td>
+<td style="text-align: left;">259.00</td>
+<td style="text-align: left;">26.00</td>
+<td style="text-align: left;">567.00</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">2</td>
 <td style="text-align: left;">CS2</td>
-<td style="text-align: left;">592.00</td>
-<td style="text-align: left;">52.00</td>
-<td style="text-align: left;">376.00</td>
+<td style="text-align: left;">531.00</td>
+<td style="text-align: left;">48.00</td>
+<td style="text-align: left;">345.00</td>
 </tr>
 </tbody>
 </table>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Replace too fast of latencies with NA values</span>
-results$Latency[results$TooFast] &lt;-<span class="st"> </span><span class="ot">NA</span>
-<span class="kw">PrintDescriptives</span>(results)</code></pre>
+<p>The upper-bound of the trimming depends on what pool of latencies are used to compute the standard deviation used for the 2-SD cut-off.</p>
+<pre class="sourceCode r"><code class="sourceCode r">ComputeUpperBound &lt;-<span class="st"> </span>function(x) <span class="kw">mean</span>(x, <span class="dt">na.rm =</span> T) +<span class="st"> </span>(<span class="dv">2</span> *<span class="st"> </span><span class="kw">sd</span>(x, <span class="dt">na.rm =</span> T))
+DropAboveUpperBound &lt;-<span class="st"> </span>function(df) {
+    cutoff &lt;-<span class="st"> </span><span class="kw">ComputeUpperBound</span>(df$Latency)
+    df$Latency[df$Latency &gt;<span class="st"> </span>cutoff] &lt;-<span class="st"> </span><span class="ot">NA</span>
+    df
+}
+
+<span class="co"># Pooling both experiments together</span>
+<span class="kw">ComputeUpperBound</span>(results$Latency)</code></pre>
+<pre><code>## [1] 1723</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Separating the two experiments</span>
+<span class="kw">by</span>(results$Latency, results$Version, ComputeUpperBound)</code></pre>
+<pre><code>## results$Version: CS1
+## [1] 1674
+## -------------------------------------------------------- 
+## results$Version: CS2
+## [1] 1746</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r">cs1 &lt;-<span class="st"> </span><span class="kw">subset</span>(results, Version ==<span class="st"> &quot;CS1&quot;</span>)
+cs1 &lt;-<span class="st"> </span><span class="kw">DropAboveUpperBound</span>(cs1)
+cs2 &lt;-<span class="st"> </span><span class="kw">subset</span>(results, Version ==<span class="st"> &quot;CS2&quot;</span>)
+cs2 &lt;-<span class="st"> </span><span class="kw">DropAboveUpperBound</span>(cs2)
+results &lt;-<span class="st"> </span><span class="kw">rbind</span>(cs1, cs2)</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">PrintDescriptives</span>(results)</code></pre>
 <table>
+<caption>Descriptives for trimmed latency values. Upper bounds were trimmed within each experimnet.</caption>
 <thead>
 <tr class="header">
 <th style="text-align: left;"></th>
@@ -194,87 +202,18 @@ results$Latency[results$TooFast] &lt;-<span class="st"> </span><span class="ot">
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">n</td>
-<td style="text-align: left;">361</td>
-<td style="text-align: left;">592</td>
+<td style="text-align: left;">243</td>
+<td style="text-align: left;">496</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">mean</td>
-<td style="text-align: left;">816.2</td>
-<td style="text-align: left;">806.6</td>
+<td style="text-align: left;">734.4</td>
+<td style="text-align: left;">720.4</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">sd</td>
-<td style="text-align: left;">434.2</td>
-<td style="text-align: left;">471.6</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">median</td>
-<td style="text-align: left;">716.1</td>
-<td style="text-align: left;">666.2</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">trimmed</td>
-<td style="text-align: left;">748.8</td>
-<td style="text-align: left;">734.0</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">mad</td>
-<td style="text-align: left;">321.0</td>
-<td style="text-align: left;">395.1</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">min</td>
-<td style="text-align: left;">249.8</td>
-<td style="text-align: left;">249.8</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">max</td>
-<td style="text-align: left;">2498</td>
-<td style="text-align: left;">2482</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">range</td>
-<td style="text-align: left;">2248</td>
-<td style="text-align: left;">2232</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">se</td>
-<td style="text-align: left;">22.85</td>
-<td style="text-align: left;">19.38</td>
-</tr>
-</tbody>
-</table>
-<p>Trim off the exceptionally slow latencies.</p>
-<pre class="sourceCode r"><code class="sourceCode r">two_sd &lt;-<span class="st"> </span><span class="dv">2</span> *<span class="st"> </span><span class="kw">sd</span>(results$Latency, <span class="dt">na.rm =</span> <span class="ot">TRUE</span>)
-too_slow &lt;-<span class="st"> </span><span class="kw">mean</span>(results$Latency, <span class="dt">na.rm =</span> <span class="ot">TRUE</span>) +<span class="st"> </span>two_sd
-num_too_slow &lt;-<span class="st"> </span><span class="kw">length</span>(<span class="kw">which</span>(results$Latency &gt;<span class="st"> </span>too_slow))
-num_non_NA &lt;-<span class="st"> </span><span class="kw">length</span>(<span class="kw">which</span>(!<span class="kw">is.na</span>(results$Latency)))</code></pre>
-<p>Reaction times slower than 1725 ms will be removed. There are 60 such trials, which is 6% of the data.</p>
-<pre class="sourceCode r"><code class="sourceCode r">results$Latency[results$Latency &gt;<span class="st"> </span>too_slow] &lt;-<span class="st"> </span><span class="ot">NA</span>
-<span class="kw">PrintDescriptives</span>(results)</code></pre>
-<table>
-<thead>
-<tr class="header">
-<th style="text-align: left;"></th>
-<th style="text-align: left;"><strong>CS1</strong></th>
-<th style="text-align: left;"><strong>CS2</strong></th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: left;">n</td>
-<td style="text-align: left;">340</td>
-<td style="text-align: left;">553</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">mean</td>
-<td style="text-align: left;">736.8</td>
-<td style="text-align: left;">721.4</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">sd</td>
-<td style="text-align: left;">298.0</td>
-<td style="text-align: left;">353.4</td>
+<td style="text-align: left;">285.2</td>
+<td style="text-align: left;">350.5</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">median</td>
@@ -283,7 +222,7 @@ num_non_NA &lt;-<span class="st"> </span><span class="kw">length</span>(<span cl
 </tr>
 <tr class="odd">
 <td style="text-align: left;">trimmed</td>
-<td style="text-align: left;">714.3</td>
+<td style="text-align: left;">715.8</td>
 <td style="text-align: left;">681.5</td>
 </tr>
 <tr class="even">
@@ -298,185 +237,104 @@ num_non_NA &lt;-<span class="st"> </span><span class="kw">length</span>(<span cl
 </tr>
 <tr class="even">
 <td style="text-align: left;">max</td>
-<td style="text-align: left;">1682</td>
+<td style="text-align: left;">1649</td>
 <td style="text-align: left;">1715</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">range</td>
-<td style="text-align: left;">1432</td>
+<td style="text-align: left;">1399</td>
 <td style="text-align: left;">1466</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">se</td>
-<td style="text-align: left;">16.16</td>
-<td style="text-align: left;">15.03</td>
+<td style="text-align: left;">18.29</td>
+<td style="text-align: left;">15.74</td>
 </tr>
 </tbody>
 </table>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">qplot</span>(<span class="dt">data =</span> results, <span class="dt">x =</span> Latency) +<span class="st"> </span><span class="kw">scale_x_continuous</span>(<span class="dt">breaks =</span> (<span class="dv">0</span>:<span class="dv">5</span> *<span class="st"> </span><span class="dv">500</span>)) +<span class="st"> </span>
-<span class="st">    </span><span class="kw">facet_grid</span>(Version ~<span class="st"> </span>.)</code></pre>
-<pre><code>## stat_bin: binwidth defaulted to range/30. Use &#39;binwidth = x&#39; to adjust
-## this.</code></pre>
-<pre><code>## stat_bin: binwidth defaulted to range/30. Use &#39;binwidth = x&#39; to adjust
-## this.</code></pre>
-<figure>
-<img src="figure/unnamed-chunk-7.png" alt="plot of chunk unnamed-chunk-7" /><figcaption>plot of chunk unnamed-chunk-7</figcaption>
-</figure>
-<h2 id="model-the-data">Model the data</h2>
-<p>Aggregate reaction times by subject</p>
-<pre class="sourceCode r"><code class="sourceCode r">subject_means &lt;-<span class="st"> </span><span class="kw">aggregate</span>(Latency ~<span class="st"> </span>Subject, results, mean)
-merge_vars &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;Subject&quot;</span>, <span class="st">&quot;EVT&quot;</span>, <span class="st">&quot;Version&quot;</span>, <span class="st">&quot;Age&quot;</span>)
-subject_means &lt;-<span class="st"> </span><span class="kw">unique</span>(<span class="kw">merge</span>(subject_means, results[merge_vars], <span class="dt">by =</span> <span class="st">&quot;Subject&quot;</span>))
-p &lt;-<span class="st"> </span><span class="kw">ggplot</span>(subject_means, <span class="kw">aes</span>(<span class="dt">x =</span> Latency, <span class="dt">fill =</span> Version)) +<span class="st"> </span><span class="kw">geom_dotplot</span>(<span class="dt">method =</span> <span class="st">&quot;histodot&quot;</span>, 
-    <span class="dt">stackgroups =</span> <span class="ot">FALSE</span>) +<span class="st"> </span><span class="kw">scale_y_continuous</span>(<span class="dt">name =</span> <span class="st">&quot;&quot;</span>, <span class="dt">breaks =</span> <span class="ot">NULL</span>)
-<span class="kw">print</span>(p)</code></pre>
-<pre><code>## stat_bindot: binwidth defaulted to range/30. Use &#39;binwidth = x&#39; to adjust
-## this.</code></pre>
-<figure>
-<img src="figure/unnamed-chunk-8.png" alt="plot of chunk unnamed-chunk-8" /><figcaption>plot of chunk unnamed-chunk-8</figcaption>
-</figure>
-<h3 id="model-the-aggregated-data">Model the aggregated data</h3>
-<pre class="sourceCode r"><code class="sourceCode r">m &lt;-<span class="st"> </span><span class="kw">lm</span>(Latency ~<span class="st"> </span>Version +<span class="st"> </span>EVT +<span class="st"> </span>Age, subject_means)
-m_tab &lt;-<span class="st"> </span><span class="kw">ascii</span>(m)
-<span class="kw">names</span>(m_tab$x)[<span class="dv">4</span>] &lt;-<span class="st"> &quot;Pr(&gt;t)&quot;</span>
-<span class="kw">print</span>(m_tab, <span class="dt">type =</span> <span class="st">&quot;pandoc&quot;</span>)</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">ComputePercentNA</span>(results)</code></pre>
 <table>
+<caption>Response rates for the experiment versions, after trimming.</caption>
 <thead>
 <tr class="header">
 <th style="text-align: left;"></th>
-<th style="text-align: left;"><strong>Estimate</strong></th>
-<th style="text-align: left;"><strong>Std. Error</strong></th>
-<th style="text-align: left;"><strong>t value</strong></th>
-<th style="text-align: left;"><strong>Pr(&gt;t)</strong></th>
+<th style="text-align: left;"><strong>Version</strong></th>
+<th style="text-align: left;"><strong>NA Latencies</strong></th>
+<th style="text-align: left;"><strong>Real Latencies</strong></th>
+<th style="text-align: left;"><strong>Percent NA</strong></th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: left;">(Intercept)</td>
-<td style="text-align: left;">812.62</td>
-<td style="text-align: left;">90.99</td>
-<td style="text-align: left;">8.93</td>
-<td style="text-align: left;">0.00</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: left;">CS1</td>
+<td style="text-align: left;">609.00</td>
+<td style="text-align: left;">243.00</td>
+<td style="text-align: left;">71.48</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">VersionCS2</td>
-<td style="text-align: left;">-7.99</td>
-<td style="text-align: left;">29.40</td>
-<td style="text-align: left;">-0.27</td>
-<td style="text-align: left;">0.79</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">EVT</td>
-<td style="text-align: left;">0.16</td>
-<td style="text-align: left;">1.03</td>
-<td style="text-align: left;">0.15</td>
-<td style="text-align: left;">0.88</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Age</td>
-<td style="text-align: left;">-2.04</td>
-<td style="text-align: left;">2.52</td>
-<td style="text-align: left;">-0.81</td>
-<td style="text-align: left;">0.42</td>
+<td style="text-align: left;">2</td>
+<td style="text-align: left;">CS2</td>
+<td style="text-align: left;">428.00</td>
+<td style="text-align: left;">496.00</td>
+<td style="text-align: left;">46.32</td>
 </tr>
 </tbody>
 </table>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">qplot</span>(<span class="dt">data =</span> subject_means, <span class="dt">x =</span> EVT, <span class="dt">y =</span> Latency) +<span class="st"> </span><span class="kw">geom_smooth</span>(<span class="dt">method =</span> <span class="st">&quot;lm&quot;</span>) +<span class="st"> </span>
-<span class="st">    </span><span class="kw">labs</span>(<span class="dt">title =</span> <span class="st">&quot;By-Subject Reaction Times By EVT Raw Score&quot;</span>)</code></pre>
-<pre><code>## Warning: Removed 1 rows containing missing values (stat_smooth).</code></pre>
-<pre><code>## Warning: Removed 1 rows containing missing values (geom_point).</code></pre>
+<h3 id="after-trimming-is-the-average-latency-shorter-for-cs2-as-compared-to-cs1-as-it-was-before-trimming"><em>After trimming, is the average latency shorter for CS2 as compared to CS1? (as it was before trimming)?</em></h3>
+<p>Yes.</p>
+<h3 id="is-there-a-relationship-between-vocab-size-either-evt-2-raw-score-of-ppvt-4-raw-score-and-latency-for-cs1">Is there a relationship between vocab size (either EVT-2 raw score of PPVT-4 raw score) and latency for CS1?</h3>
+<p>I'm going to compute the average latency within each subject and plot latency as a function of EVT and PPVT.</p>
+<pre class="sourceCode r"><code class="sourceCode r">subject_means &lt;-<span class="st"> </span><span class="kw">ddply</span>(results, <span class="st">&quot;Subject&quot;</span>, summarize, <span class="dt">Version =</span> <span class="kw">unique</span>(Version), 
+    <span class="dt">EVT =</span> <span class="kw">unique</span>(EVT), <span class="dt">PPVT =</span> <span class="kw">unique</span>(PPVT), <span class="dt">Latency =</span> <span class="kw">mean</span>(Latency, <span class="dt">na.rm =</span> <span class="ot">TRUE</span>))
+cs1 &lt;-<span class="st"> </span><span class="kw">subset</span>(subject_means, Version ==<span class="st"> &quot;CS1&quot;</span>)
+<span class="co"># EVT</span>
+<span class="kw">qplot</span>(<span class="dt">data =</span> cs1, <span class="dt">x =</span> EVT, <span class="dt">y =</span> Latency) +<span class="st"> </span><span class="kw">geom_smooth</span>(<span class="dt">method =</span> <span class="st">&quot;lm&quot;</span>)</code></pre>
+<figure>
+<img src="figure/unnamed-chunk-91.png" alt="plot of chunk unnamed-chunk-9" /><figcaption>plot of chunk unnamed-chunk-9</figcaption>
+</figure>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># PPVT</span>
+<span class="kw">qplot</span>(<span class="dt">data =</span> cs1, <span class="dt">x =</span> PPVT, <span class="dt">y =</span> Latency) +<span class="st"> </span><span class="kw">geom_smooth</span>(<span class="dt">method =</span> <span class="st">&quot;lm&quot;</span>)</code></pre>
+<pre><code>## Warning: Removed 2 rows containing missing values (stat_smooth).</code></pre>
+<pre><code>## Warning: Removed 2 rows containing missing values (geom_point).</code></pre>
+<figure>
+<img src="figure/unnamed-chunk-92.png" alt="plot of chunk unnamed-chunk-9" /><figcaption>plot of chunk unnamed-chunk-9</figcaption>
+</figure>
+<ol start="5" type="1">
+<li>Same question for CS2?</li>
+</ol>
+<p>For the aggregated values, there is some correlation between EVT and latency.</p>
+<pre class="sourceCode r"><code class="sourceCode r">cs2 &lt;-<span class="st"> </span><span class="kw">subset</span>(subject_means, Version ==<span class="st"> &quot;CS2&quot;</span>)
+<span class="co"># EVT</span>
+<span class="kw">qplot</span>(<span class="dt">data =</span> cs2, <span class="dt">x =</span> EVT, <span class="dt">y =</span> Latency) +<span class="st"> </span><span class="kw">geom_smooth</span>(<span class="dt">method =</span> <span class="st">&quot;lm&quot;</span>)</code></pre>
 <figure>
 <img src="figure/unnamed-chunk-101.png" alt="plot of chunk unnamed-chunk-10" /><figcaption>plot of chunk unnamed-chunk-10</figcaption>
 </figure>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">qplot</span>(<span class="dt">data =</span> subject_means, <span class="dt">x =</span> Age, <span class="dt">y =</span> Latency) +<span class="st"> </span><span class="kw">geom_smooth</span>(<span class="dt">method =</span> <span class="st">&quot;lm&quot;</span>) +<span class="st"> </span>
-<span class="st">    </span><span class="kw">labs</span>(<span class="dt">title =</span> <span class="st">&quot;By-Subject Reaction Times By Age in Months&quot;</span>)</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># PPVT</span>
+<span class="kw">qplot</span>(<span class="dt">data =</span> cs2, <span class="dt">x =</span> PPVT, <span class="dt">y =</span> Latency) +<span class="st"> </span><span class="kw">geom_smooth</span>(<span class="dt">method =</span> <span class="st">&quot;lm&quot;</span>)</code></pre>
 <pre><code>## Warning: Removed 1 rows containing missing values (stat_smooth).</code></pre>
 <pre><code>## Warning: Removed 1 rows containing missing values (geom_point).</code></pre>
 <figure>
 <img src="figure/unnamed-chunk-102.png" alt="plot of chunk unnamed-chunk-10" /><figcaption>plot of chunk unnamed-chunk-10</figcaption>
 </figure>
-<h3 id="check-the-model-assumptions">Check the model assumptions</h3>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(<span class="kw">gvlma</span>(m))</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">summary</span>(<span class="kw">lm</span>(Latency ~<span class="st"> </span>EVT, cs2))</code></pre>
 <pre><code>## 
 ## Call:
-## lm(formula = Latency ~ Version + EVT + Age, data = subject_means)
+## lm(formula = Latency ~ EVT, data = cs2)
+## 
+## Residuals:
+##    Min     1Q Median     3Q    Max 
+## -188.4  -76.8  -12.4   67.2  251.1 
 ## 
 ## Coefficients:
-## (Intercept)   VersionCS2          EVT          Age  
-##      812.62        -7.99         0.16        -2.04  
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)   874.26      86.99    10.1  5.9e-11 ***
+## EVT            -2.50       1.47    -1.7      0.1    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## 
-## 
-## ASSESSMENT OF THE LINEAR MODEL ASSUMPTIONS
-## USING THE GLOBAL TEST ON 4 DEGREES-OF-FREEDOM:
-## Level of Significance =  0.05 
-## 
-## Call:
-##  gvlma(x = m) 
-## 
-##                       Value  p-value                   Decision
-## Global Stat        19.13791 0.000738 Assumptions NOT satisfied!
-## Skewness            1.47683 0.224271    Assumptions acceptable.
-## Kurtosis            3.99656 0.045593 Assumptions NOT satisfied!
-## Link Function       0.00376 0.951123    Assumptions acceptable.
-## Heteroscedasticity 13.66077 0.000219 Assumptions NOT satisfied!</code></pre>
-<p>I need to find a transformation or a link function better suited for the distribution of these data.</p>
-<h1 id="does-trial-number-fatigue-predict-latency">Does Trial Number (fatigue) predict latency?</h1>
-<p>Yes, there is a significant effect of Trial Number on Latency. It's a very small effect.</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">qplot</span>(<span class="dt">data =</span> results, <span class="dt">x =</span> Trial, <span class="dt">y =</span> Latency) +<span class="st"> </span><span class="kw">geom_smooth</span>(<span class="dt">method =</span> <span class="st">&quot;lm&quot;</span>)</code></pre>
-<figure>
-<img src="figure/unnamed-chunk-12.png" alt="plot of chunk unnamed-chunk-12" /><figcaption>plot of chunk unnamed-chunk-12</figcaption>
-</figure>
-<pre class="sourceCode r"><code class="sourceCode r">m2 &lt;-<span class="st"> </span><span class="kw">lm</span>(<span class="dt">data =</span> results, Latency ~<span class="st"> </span>Trial +<span class="st"> </span>Version +<span class="st"> </span>EVT +<span class="st"> </span>Age)
-m_tab &lt;-<span class="st"> </span><span class="kw">ascii</span>(m2)
-<span class="kw">names</span>(m_tab$x)[<span class="dv">4</span>] &lt;-<span class="st"> &quot;Pr(&gt;t)&quot;</span>
-<span class="kw">print</span>(m_tab, <span class="dt">type =</span> <span class="st">&quot;pandoc&quot;</span>)</code></pre>
-<table>
-<thead>
-<tr class="header">
-<th style="text-align: left;"></th>
-<th style="text-align: left;"><strong>Estimate</strong></th>
-<th style="text-align: left;"><strong>Std. Error</strong></th>
-<th style="text-align: left;"><strong>t value</strong></th>
-<th style="text-align: left;"><strong>Pr(&gt;t)</strong></th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: left;">(Intercept)</td>
-<td style="text-align: left;">804.39</td>
-<td style="text-align: left;">80.81</td>
-<td style="text-align: left;">9.95</td>
-<td style="text-align: left;">0.00</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Trial</td>
-<td style="text-align: left;">2.72</td>
-<td style="text-align: left;">1.07</td>
-<td style="text-align: left;">2.54</td>
-<td style="text-align: left;">0.01</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">VersionCS2</td>
-<td style="text-align: left;">-20.79</td>
-<td style="text-align: left;">23.29</td>
-<td style="text-align: left;">-0.89</td>
-<td style="text-align: left;">0.37</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">EVT</td>
-<td style="text-align: left;">-0.03</td>
-<td style="text-align: left;">0.88</td>
-<td style="text-align: left;">-0.03</td>
-<td style="text-align: left;">0.98</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">Age</td>
-<td style="text-align: left;">-2.60</td>
-<td style="text-align: left;">2.19</td>
-<td style="text-align: left;">-1.19</td>
-<td style="text-align: left;">0.24</td>
-</tr>
-</tbody>
-</table>
+## Residual standard error: 110 on 29 degrees of freedom
+## Multiple R-squared:  0.0904, Adjusted R-squared:  0.059 
+## F-statistic: 2.88 on 1 and 29 DF,  p-value: 0.1</code></pre>
 </body>
 </html>

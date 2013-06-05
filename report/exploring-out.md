@@ -4,198 +4,169 @@ Exploring the latency data
 This `Rmd` file is where I try to figure out what's going on in the data.
 
 ~~~~ {.r}
-# Latency data
+# Load the latency data
 setwd("../")
 source("R/01_functions.r", chdir = TRUE)
 load("data/results.RData")
 ~~~~
 
-Look at the untrimmed latency data
-----------------------------------
+Reponses to JE's email:
+-----------------------
+
+### *For methods, can you write bullet points on how we calculated latencies?*
+
+Reaction times measure the latency between looking to the distractor image and shifting the gaze towards the target image after the onset of the target word. The following conditions were required for the latency calculation:
+
+-   During the first 50 ms of the target word, the child had to be looking onscreen, but not at the target image.
+-   The first look to the target must occur afte 250r ms. (That is, shifts of looks towards the target before 250 ms were considered too fast to be deliberate responses to the target word.)
+
+### *After trimming, what % of trials had latencies in CS1? In CS2? Are there more trials with latencies in CS2 compared to CS1 after trimming, as there were before trimming?*
+
+Here are the summary stats for the unadjusted values. First, we remove subjects who have been designated as non-keepers. We also remove subjects who were tested with the AAE dialect stimuli, since those audio stimuli were not the same duration.
 
 ~~~~ {.r}
-PrintDescriptives <- function(results) {
-    descriptives <- describeBy(results$Latency, group = results$Version, mat = T, 
-        skew = F)
-    rownames(descriptives) <- c("CS1", "CS2")
-    # Convert to a dataframe for table-printing
-    descriptives <- t(descriptives)[-c(1:3), ]
-    descriptives <- as.data.frame(descriptives)
-    print(ascii(descriptives), type = "pandoc")
-}
+results <- subset(results, is.na(Keeper) & Dialect == "SAE")
 PrintDescriptives(results)
 ~~~~
 
 ||**CS1**|**CS2**|
 |---|:------|:------|
-|n|397|644|
-|mean|755.0|754.3|
-|sd|457.6|485.5|
-|median|682.8|616.2|
-|trimmed|700.4|689.5|
+|n|285|579|
+|mean|756.8|752.1|
+|sd|451.1|484.7|
+|median|699.5|616.2|
+|trimmed|702.5|687.8|
 |mad|345.7|370.4|
 |min|66.62|66.62|
 |max|2498|2482|
 |range|2432|2415|
-|se|22.96|19.13|
-
-These means are very close! Let's look at the histograms.
+|se|26.72|20.14|
 
 ~~~~ {.r}
-qplot(data = results, x = Latency) + scale_x_continuous(breaks = (0:5 * 500)) + 
-    facet_grid(Version ~ .)
+ComputePercentNA(results)
 ~~~~
 
-    ## stat_bin: binwidth defaulted to range/30. Use 'binwidth = x' to adjust
-    ## this.
+||**Version**|**NA Latencies**|**Real Latencies**|**Percent NA**|
+|---|:----------|:---------------|:-----------------|:-------------|
+|1|CS1|567.00|285.00|66.55|
+|2|CS2|345.00|579.00|37.34|
 
-    ## stat_bin: binwidth defaulted to range/30. Use 'binwidth = x' to adjust
-    ## this.
-
-![Histograms of untrimmed latencies](figure/unnamed-chunk-3.png)
-
-Look at the number of NA latencies in each version of the experiment. There is probably a significant effect of group on the odds of obtaining a latency.
+Now we trim of the too-fast values using 250 ms as the cut-off.
 
 ~~~~ {.r}
-results$NotNA <- ifelse(is.na(results$Latency), 0, 1)
-not_na <- dcast(results, Version ~ NotNA, value.var = "NotNA")
-names(not_na) <- c("Version", "Number NA Latencies", "Number Real Latencies")
-print(ascii(not_na), type = "pandoc")
+results <- TrimTooFast(results, cutoff = 250)
 ~~~~
 
-||**Version**|**Number NA Latencies**|**Number Real Latencies**|
-|---|:----------|:----------------------|:------------------------|
-|1|CS1|827.00|397.00|
-|2|CS2|376.00|644.00|
+||**Version**|**Num \> 250 ms**|**Num \< 250 ms**|**Num NA**|
+|---|:----------|:----------------|:----------------|:---------|
+|1|CS1|259.00|26.00|567.00|
+|2|CS2|531.00|48.00|345.00|
 
-Trim off fast and slow latencies
---------------------------------
-
-Trim off the impossibly fast latencies (i.e., less than 250 ms.)
+The upper-bound of the trimming depends on what pool of latencies are used to compute the standard deviation used for the 2-SD cut-off.
 
 ~~~~ {.r}
-results$TooFast <- round(results$Latency) < 250
-# How many latencies were too fast within each group
-too_fast <- dcast(results, Version ~ TooFast)
-names(too_fast) <- c("Version", "Number > 250 ms", "Number < 250 ms", "Number NA")
-print(ascii(too_fast), type = "pandoc")
+ComputeUpperBound <- function(x) mean(x, na.rm = T) + (2 * sd(x, na.rm = T))
+DropAboveUpperBound <- function(df) {
+    cutoff <- ComputeUpperBound(df$Latency)
+    df$Latency[df$Latency > cutoff] <- NA
+    df
+}
+
+# Pooling both experiments together
+ComputeUpperBound(results$Latency)
 ~~~~
 
-||**Version**|**Number \> 250 ms**|**Number \< 250 ms**|**Number NA**|
-|---|:----------|:-------------------|:-------------------|:------------|
-|1|CS1|361.00|36.00|827.00|
-|2|CS2|592.00|52.00|376.00|
+    ## [1] 1723
 
 ~~~~ {.r}
-# Replace too fast of latencies with NA values
-results$Latency[results$TooFast] <- NA
+# Separating the two experiments
+by(results$Latency, results$Version, ComputeUpperBound)
+~~~~
+
+    ## results$Version: CS1
+    ## [1] 1674
+    ## -------------------------------------------------------- 
+    ## results$Version: CS2
+    ## [1] 1746
+
+~~~~ {.r}
+cs1 <- subset(results, Version == "CS1")
+cs1 <- DropAboveUpperBound(cs1)
+cs2 <- subset(results, Version == "CS2")
+cs2 <- DropAboveUpperBound(cs2)
+results <- rbind(cs1, cs2)
+~~~~
+
+~~~~ {.r}
 PrintDescriptives(results)
 ~~~~
 
 ||**CS1**|**CS2**|
 |---|:------|:------|
-|n|361|592|
-|mean|816.2|806.6|
-|sd|434.2|471.6|
-|median|716.1|666.2|
-|trimmed|748.8|734.0|
-|mad|321.0|395.1|
-|min|249.8|249.8|
-|max|2498|2482|
-|range|2248|2232|
-|se|22.85|19.38|
-
-Trim off the exceptionally slow latencies.
-
-~~~~ {.r}
-two_sd <- 2 * sd(results$Latency, na.rm = TRUE)
-too_slow <- mean(results$Latency, na.rm = TRUE) + two_sd
-num_too_slow <- length(which(results$Latency > too_slow))
-num_non_NA <- length(which(!is.na(results$Latency)))
-~~~~
-
-Reaction times slower than 1725 ms will be removed. There are 60 such trials, which is 6% of the data.
-
-~~~~ {.r}
-results$Latency[results$Latency > too_slow] <- NA
-PrintDescriptives(results)
-~~~~
-
-||**CS1**|**CS2**|
-|---|:------|:------|
-|n|340|553|
-|mean|736.8|721.4|
-|sd|298.0|353.4|
+|n|243|496|
+|mean|734.4|720.4|
+|sd|285.2|350.5|
 |median|699.5|632.9|
-|trimmed|714.3|681.5|
+|trimmed|715.8|681.5|
 |mad|296.3|345.7|
 |min|249.8|249.8|
-|max|1682|1715|
-|range|1432|1466|
-|se|16.16|15.03|
+|max|1649|1715|
+|range|1399|1466|
+|se|18.29|15.74|
 
 ~~~~ {.r}
-qplot(data = results, x = Latency) + scale_x_continuous(breaks = (0:5 * 500)) + 
-    facet_grid(Version ~ .)
+ComputePercentNA(results)
 ~~~~
 
-    ## stat_bin: binwidth defaulted to range/30. Use 'binwidth = x' to adjust
-    ## this.
+||**Version**|**NA Latencies**|**Real Latencies**|**Percent NA**|
+|---|:----------|:---------------|:-----------------|:-------------|
+|1|CS1|609.00|243.00|71.48|
+|2|CS2|428.00|496.00|46.32|
 
-    ## stat_bin: binwidth defaulted to range/30. Use 'binwidth = x' to adjust
-    ## this.
+### *After trimming, is the average latency shorter for CS2 as compared to CS1? (as it was before trimming)?*
 
-![plot of chunk unnamed-chunk-7](figure/unnamed-chunk-7.png)
+Yes.
 
-Model the data
---------------
+### Is there a relationship between vocab size (either EVT-2 raw score of PPVT-4 raw score) and latency for CS1?
 
-Aggregate reaction times by subject
+I'm going to compute the average latency within each subject and plot latency as a function of EVT and PPVT.
 
 ~~~~ {.r}
-subject_means <- aggregate(Latency ~ Subject, results, mean)
-merge_vars <- c("Subject", "EVT", "Version", "Age")
-subject_means <- unique(merge(subject_means, results[merge_vars], by = "Subject"))
-p <- ggplot(subject_means, aes(x = Latency, fill = Version)) + geom_dotplot(method = "histodot", 
-    stackgroups = FALSE) + scale_y_continuous(name = "", breaks = NULL)
-print(p)
+subject_means <- ddply(results, "Subject", summarize, Version = unique(Version), 
+    EVT = unique(EVT), PPVT = unique(PPVT), Latency = mean(Latency, na.rm = TRUE))
+cs1 <- subset(subject_means, Version == "CS1")
+# EVT
+qplot(data = cs1, x = EVT, y = Latency) + geom_smooth(method = "lm")
 ~~~~
 
-    ## stat_bindot: binwidth defaulted to range/30. Use 'binwidth = x' to adjust
-    ## this.
-
-![plot of chunk unnamed-chunk-8](figure/unnamed-chunk-8.png)
-
-### Model the aggregated data
+![plot of chunk unnamed-chunk-9](figure/unnamed-chunk-91.png)
 
 ~~~~ {.r}
-m <- lm(Latency ~ Version + EVT + Age, subject_means)
-m_tab <- ascii(m)
-names(m_tab$x)[4] <- "Pr(>t)"
-print(m_tab, type = "pandoc")
+# PPVT
+qplot(data = cs1, x = PPVT, y = Latency) + geom_smooth(method = "lm")
 ~~~~
 
-||**Estimate**|**Std. Error**|**t value**|**Pr(\>t)**|
-|---|:-----------|:-------------|:----------|:----------|
-|(Intercept)|812.62|90.99|8.93|0.00|
-|VersionCS2|-7.99|29.40|-0.27|0.79|
-|EVT|0.16|1.03|0.15|0.88|
-|Age|-2.04|2.52|-0.81|0.42|
+    ## Warning: Removed 2 rows containing missing values (stat_smooth).
+
+    ## Warning: Removed 2 rows containing missing values (geom_point).
+
+![plot of chunk unnamed-chunk-9](figure/unnamed-chunk-92.png)
+
+1.  Same question for CS2?
+
+For the aggregated values, there is some correlation between EVT and latency.
 
 ~~~~ {.r}
-qplot(data = subject_means, x = EVT, y = Latency) + geom_smooth(method = "lm") + 
-    labs(title = "By-Subject Reaction Times By EVT Raw Score")
+cs2 <- subset(subject_means, Version == "CS2")
+# EVT
+qplot(data = cs2, x = EVT, y = Latency) + geom_smooth(method = "lm")
 ~~~~
-
-    ## Warning: Removed 1 rows containing missing values (stat_smooth).
-
-    ## Warning: Removed 1 rows containing missing values (geom_point).
 
 ![plot of chunk unnamed-chunk-10](figure/unnamed-chunk-101.png)
 
 ~~~~ {.r}
-qplot(data = subject_means, x = Age, y = Latency) + geom_smooth(method = "lm") + 
-    labs(title = "By-Subject Reaction Times By Age in Months")
+# PPVT
+qplot(data = cs2, x = PPVT, y = Latency) + geom_smooth(method = "lm")
 ~~~~
 
     ## Warning: Removed 1 rows containing missing values (stat_smooth).
@@ -204,60 +175,25 @@ qplot(data = subject_means, x = Age, y = Latency) + geom_smooth(method = "lm") +
 
 ![plot of chunk unnamed-chunk-10](figure/unnamed-chunk-102.png)
 
-### Check the model assumptions
-
 ~~~~ {.r}
-print(gvlma(m))
+summary(lm(Latency ~ EVT, cs2))
 ~~~~
 
     ## 
     ## Call:
-    ## lm(formula = Latency ~ Version + EVT + Age, data = subject_means)
+    ## lm(formula = Latency ~ EVT, data = cs2)
+    ## 
+    ## Residuals:
+    ##    Min     1Q Median     3Q    Max 
+    ## -188.4  -76.8  -12.4   67.2  251.1 
     ## 
     ## Coefficients:
-    ## (Intercept)   VersionCS2          EVT          Age  
-    ##      812.62        -7.99         0.16        -2.04  
+    ##             Estimate Std. Error t value Pr(>|t|)    
+    ## (Intercept)   874.26      86.99    10.1  5.9e-11 ***
+    ## EVT            -2.50       1.47    -1.7      0.1    
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
     ## 
-    ## 
-    ## ASSESSMENT OF THE LINEAR MODEL ASSUMPTIONS
-    ## USING THE GLOBAL TEST ON 4 DEGREES-OF-FREEDOM:
-    ## Level of Significance =  0.05 
-    ## 
-    ## Call:
-    ##  gvlma(x = m) 
-    ## 
-    ##                       Value  p-value                   Decision
-    ## Global Stat        19.13791 0.000738 Assumptions NOT satisfied!
-    ## Skewness            1.47683 0.224271    Assumptions acceptable.
-    ## Kurtosis            3.99656 0.045593 Assumptions NOT satisfied!
-    ## Link Function       0.00376 0.951123    Assumptions acceptable.
-    ## Heteroscedasticity 13.66077 0.000219 Assumptions NOT satisfied!
-
-I need to find a transformation or a link function better suited for the distribution of these data.
-
-Does Trial Number (fatigue) predict latency?
-============================================
-
-Yes, there is a significant effect of Trial Number on Latency. It's a very small effect.
-
-~~~~ {.r}
-qplot(data = results, x = Trial, y = Latency) + geom_smooth(method = "lm")
-~~~~
-
-![plot of chunk unnamed-chunk-12](figure/unnamed-chunk-12.png)
-
-~~~~ {.r}
-m2 <- lm(data = results, Latency ~ Trial + Version + EVT + Age)
-m_tab <- ascii(m2)
-names(m_tab$x)[4] <- "Pr(>t)"
-print(m_tab, type = "pandoc")
-~~~~
-
-||**Estimate**|**Std. Error**|**t value**|**Pr(\>t)**|
-|---|:-----------|:-------------|:----------|:----------|
-|(Intercept)|804.39|80.81|9.95|0.00|
-|Trial|2.72|1.07|2.54|0.01|
-|VersionCS2|-20.79|23.29|-0.89|0.37|
-|EVT|-0.03|0.88|-0.03|0.98|
-|Age|-2.60|2.19|-1.19|0.24|
-
+    ## Residual standard error: 110 on 29 degrees of freedom
+    ## Multiple R-squared:  0.0904, Adjusted R-squared:  0.059 
+    ## F-statistic: 2.88 on 1 and 29 DF,  p-value: 0.1

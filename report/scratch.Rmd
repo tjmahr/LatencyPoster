@@ -1,0 +1,188 @@
+
+
+
+```{r, fig.width=7, fig.height=6, fig.cap=c('Histograms of untrimmed latencies')}
+qplot(data = results, x = Latency) + scale_x_continuous(breaks = (0:5 * 500)) + 
+  facet_grid(Version ~ .)
+```
+
+Examine the number of NA latencies in each version of the experiment. There is
+probably a significant effect of group on the odds of obtaining a latency.
+
+```{r, results = 'asis'}
+ComputePercentNA(results)
+```
+Table: Number and Percentage of Miss vs Realized Latencies per experiment
+
+
+
+
+## Trim off fast and slow latencies
+
+
+### Trim off the impossibly fast latencies (i.e., less than 250 ms.)
+
+```{r message=FALSE, warning=FALSE, results='asis'}
+results <- TrimTooFast(results, cutoff = 250)
+PrintDescriptives(results)
+```
+
+
+### Trim off the exceptionally slow latencies.
+
+```{r, warning=FALSE, results='asis'}
+results <- TrimTooSlow(results, sd_cutoff = 2)
+PrintDescriptives(results)
+```
+
+Reaction times slower than `r attr(results, "SlowCutOff")` ms will be removed. There are
+`r TrimmedSlow` such trials.
+
+
+
+
+## Transform the data
+
+```{r, warning=FALSE, results='asis'}
+qplot(data = results, x = Latency) + facet_grid(Version ~ .) + 
+  labs(title = "Trimmed Latencies")
+qplot(data = results, x = 1 / Latency) + facet_grid(Version ~ .) + 
+  labs(title = "Reciprocal-transformed, trimmed Latencies")
+qplot(data = results, x = log(Latency)) + facet_grid(Version ~ .) + 
+  labs(title = "Log-transformed, trimmed Latencies")
+```
+
+
+
+```{r}
+results$LogLatency <- log(results$Latency)
+results$Rate <- 1 / results$Latency
+
+m <- lm(Rate ~ EVT, data = results)
+summary(m)
+gvlma(m)
+plot(m, which = 2)
+
+m <- lm(LogLatency ~ EVT, data = results)
+summary(m)
+gvlma(m)
+plot(m, which = 2)
+```
+
+```{r}
+lmer(Rate ~ Version + (1|Subject), results)
+```
+
+
+## Model the data
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Aggregate reaction times by subject
+
+```{r, fig.height=4}
+# subject_means <- aggregate(Latency ~ Subject, results, mean)
+# merge_vars <- c("Subject", "EVT", "Version", "Age")
+# subject_means <- unique(merge(subject_means, results[merge_vars], by="Subject"))
+# 
+# p <- ggplot(subject_means, aes(x = Latency, fill = Version)) + geom_dotplot(method="histodot", stackgroups=FALSE)
+# print(p)
+```
+
+### Model the aggregated data
+
+```{r, warning=FALSE, results='asis'}
+m <- lm(Latency ~ Version + EVT + Age, subject_means)
+m_tab <- ascii(m)
+names(m_tab$x)[4] <- "Pr(>t)"
+print(m_tab, type = "pandoc")
+```
+
+```{r}
+qplot(data = subject_means, x = EVT, y = Latency) + 
+  geom_smooth(method = "lm") + 
+  labs(title = "By-Subject Reaction Times By EVT Raw Score")
+qplot(data = subject_means, x = Age, y = Latency) + 
+  geom_smooth(method = "lm") + 
+  labs(title = "By-Subject Reaction Times By Age in Months")
+```
+
+
+### Check the model assumptions
+
+```{r}
+print(gvlma(m))
+```
+
+I need to find a transformation or a link function better suited for the distribution of these data.
+
+
+
+
+
+
+
+# Does Trial Number (fatigue) predict latency?
+
+Yes, there is a significant effect of Trial Number on Latency. It's a very small effect.
+
+```{r, results = 'asis', warning = FALSE}
+qplot(data = results, x = Trial, y = Latency) + geom_smooth(method = "lm")
+m2 <- lm(data = results, Latency ~ Trial + Version + EVT + Age)
+m_tab <- ascii(m2)
+names(m_tab$x)[4] <- "Pr(>t)"
+print(m_tab, type = "pandoc")
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
