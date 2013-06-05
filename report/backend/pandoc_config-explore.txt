@@ -6,3 +6,6 @@ o: exploring-out.html
   
 format: markdown_github
 o: exploring-out.md
+
+format: docx
+o: exploring-out.docx

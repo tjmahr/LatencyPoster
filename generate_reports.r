@@ -18,4 +18,5 @@ pandoc('report-mid.md', config=report_config, format='docx')
 pandoc('report-mid.md', config=report_config, format='markdown_github')
 
 pandoc('exploring-mid.md', config=explore_config, format = "html5")
+pandoc('exploring-mid.md', config=explore_config, format = "docx")
 pandoc('exploring-mid.md', config=explore_config, format = "markdown_github")

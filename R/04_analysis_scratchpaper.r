@@ -48,7 +48,7 @@ qplot(data = results, x = Latency) + scale_x_continuous(breaks = (0:5 * 500)) + 
 results$Group <- ifelse(results$Group == "CS1", -.5, .5)
 
 library(lme4)
-m <- lmer(Latency ~ Version + EVT + Age + (1 |Subject), data = results)
+m <- lmer(Latency ~ Version + EVT + Age + Trial + (Trial |Subject) + (1 | WordGroup), data = results)
 summary(m)
 
 ascii(summary(m))

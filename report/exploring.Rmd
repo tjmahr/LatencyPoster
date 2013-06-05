@@ -3,24 +3,89 @@
 This `Rmd` file is where I try to figure out what's going on in the data.
 
 ```{r, results='hide', message=FALSE, warning=FALSE}
-# Latency data
+# Load the latency data
 setwd("../")
 source('R/01_functions.r', chdir = TRUE)
 load("data/results.RData")
 ```
 
-## Look at the untrimmed latency data
-```{r, warning=FALSE, results='asis'}
+```{r, message=FALSE, warning=FALSE, echo =FALSE}
+# Functions for frequently used queries
+ComputePercentNA <- function(results) {
+  results$NotNA <- ifelse(is.na(results$Latency), 0, 1)
+  not_na <- dcast(results, Version ~ NotNA, value.var = "NotNA")
+  names(not_na) <- c("Version", "NAs", "Real")
+  not_na <- transform(not_na, PercentNA = round((NAs / (NAs + Real)) * 100, 2))
+  names(not_na) <- c("Version", "NA Latencies", "Real Latencies", "Percent NA")
+  PrettyPrint(not_na)
+}
+
 PrintDescriptives <- function(results) {
   descriptives <- describeBy(results$Latency, group=results$Version, mat=T, skew=F)
   rownames(descriptives) <- c("CS1", "CS2")
   # Convert to a dataframe for table-printing
   descriptives <- t(descriptives)[-c(1:3), ]
   descriptives <- as.data.frame(descriptives)
-  print(ascii(descriptives), type = "pandoc")  
+  PrettyPrint(descriptives)
 }
+
+TrimTooFast <- function(results, cutoff = 250) {
+  results$TooFast <- round(results$Latency) < cutoff
+  # How many latencies were too fast within each group
+  too_fast <- dcast(results, Version ~ TooFast)
+  names(too_fast) <- sprintf(c("Version", "Num > %1.f ms", "Num < %1.f ms", "Num NA"), cutoff)
+  PrettyPrint(too_fast)
+  # Store some facts about the trimming
+  attr(results, "TrimmedFast") <- length(which(round(results$Latency) < cutoff))
+  attr(results, "FastCutOff") <- cutoff
+  # Replace too-fast latencies with NA values
+  results$Latency[round(results$Latency) < cutoff] <- NA  
+  results$TooFast <- NULL
+  results
+}
+
+TrimTooSlow <- function(results, sd_cutoff = 2) {
+  sd_limit <- sd_cutoff * sd(results$Latency, na.rm = TRUE)
+  cutoff <- mean(results$Latency, na.rm = TRUE) + sd_limit
+  results$TooSlow <- round(results$Latency) > cutoff
+  # How many latencies were too slow within each group
+  too_slow <- dcast(results, Version ~ TooSlow)
+  names(too_slow) <- sprintf(c("Version", "Num < %1.f ms", "Num > %1.f ms", "Num NA"), cutoff)
+  PrettyPrint(too_slow)
+  # Store information about the trimming
+  attr(results, "TrimmedSlow") <- length(which(results$Latency > cutoff))
+  attr(results, "SlowCutOff") <- cutoff
+  # Trim slow values
+  results$Latency[results$Latency > too_slow] <- NA
+  results$TooSlow <- NULL
+  results
+}
+
+PrettyPrint <- function(x) suppressWarnings(print(ascii(x), type = "pandoc"))
+```
+
+
+
+
+## Look at the untrimmed latency data
+
+```{r, results='asis'}
 PrintDescriptives(results)
 ```
+Table: Descriptives for unadjusted latency values
+
+
+### Remove nonkeepers
+
+We remove subject who have been designated as non-keepers. We also remove
+subjects who were tested with the AAE dialect stimuli, since those audio
+stimuli were not the same duration.
+
+```{r}
+results <- subset(results, is.na(Keeper) & Dialect == "SAE")
+PrintDescriptives(results)
+```
+Table: Descriptives after excluding some subjects
 
 These means are very close! Let's look at the histograms.
 
@@ -29,57 +94,119 @@ qplot(data = results, x = Latency) + scale_x_continuous(breaks = (0:5 * 500)) +
   facet_grid(Version ~ .)
 ```
 
-Look at the number of NA latencies in each version of the experiment. There is probably a significant effect of group on the odds of obtaining a latency.
+Examine the number of NA latencies in each version of the experiment. There is
+probably a significant effect of group on the odds of obtaining a latency.
 
-```{r, message=FALSE, warning=FALSE, results='asis'}
-results$NotNA <- ifelse(is.na(results$Latency), 0, 1)
-not_na <- dcast(results, Version ~ NotNA, value.var = "NotNA")
-names(not_na) <- c("Version", "Number NA Latencies", "Number Real Latencies")
-print(ascii(not_na), type = "pandoc")
+```{r, results = 'asis'}
+ComputePercentNA(results)
 ```
+Table: Number and Percentage of Miss vs Realized Latencies per experiment
+
+
+
 
 ## Trim off fast and slow latencies
 
-Trim off the impossibly fast latencies (i.e., less than 250 ms.)
 
-```{rmessage=FALSE, warning=FALSE, results='asis'}
-results$TooFast <- round(results$Latency) < 250
-# How many latencies were too fast within each group
-too_fast <- dcast(results, Version ~ TooFast)
-names(too_fast) <- c("Version", "Number > 250 ms", "Number < 250 ms", "Number NA")
-print(ascii(too_fast), type = "pandoc")
-# Replace too fast of latencies with NA values
-results$Latency[results$TooFast] <- NA
+### Trim off the impossibly fast latencies (i.e., less than 250 ms.)
+
+```{r message=FALSE, warning=FALSE, results='asis'}
+results <- TrimTooFast(results, cutoff = 250)
 PrintDescriptives(results)
 ```
 
-Trim off the exceptionally slow latencies.
 
-```{r}
-two_sd <- 2 * sd(results$Latency, na.rm=TRUE)
-too_slow <- mean(results$Latency, na.rm = TRUE) + two_sd
-num_too_slow <- length(which(results$Latency > too_slow))
-num_non_NA <- length(which(!is.na(results$Latency)))
-```
-
-Reaction times slower than `r round(too_slow)` ms will be removed. There are `r num_too_slow` such trials, which is `r round((num_too_slow / num_non_NA)*100)`% of the data.
+### Trim off the exceptionally slow latencies.
 
 ```{r, warning=FALSE, results='asis'}
-results$Latency[results$Latency > too_slow] <- NA
+results <- TrimTooSlow(results, sd_cutoff = 2)
 PrintDescriptives(results)
-qplot(data = results, x = Latency) + scale_x_continuous(breaks = (0:5 * 500)) + 
-  facet_grid(Version ~ .)
 ```
+
+Reaction times slower than `r attr(results, "SlowCutOff")` ms will be removed. There are
+`r TrimmedSlow` such trials.
+
+
+
+
+## Transform the data
+
+```{r, warning=FALSE, results='asis'}
+qplot(data = results, x = Latency) + facet_grid(Version ~ .) + 
+  labs(title = "Trimmed Latencies")
+qplot(data = results, x = 1 / Latency) + facet_grid(Version ~ .) + 
+  labs(title = "Reciprocal-transformed, trimmed Latencies")
+qplot(data = results, x = log(Latency)) + facet_grid(Version ~ .) + 
+  labs(title = "Log-transformed, trimmed Latencies")
+```
+
+
+
+```{r}
+results$LogLatency <- log(results$Latency)
+results$Rate <- 1 / results$Latency
+
+m <- lm(Rate ~ EVT, data = results)
+summary(m)
+gvlma(m)
+plot(m, which = 2)
+
+m <- lm(LogLatency ~ EVT, data = results)
+summary(m)
+gvlma(m)
+plot(m, which = 2)
+```
+
+```{r}
+lmer(Rate ~ Version + (1|Subject), results)
+```
+
 
 ## Model the data
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 Aggregate reaction times by subject
+
 ```{r, fig.height=4}
-subject_means <- aggregate(Latency ~ Subject, results, mean)
-merge_vars <- c("Subject", "EVT", "Version", "Age")
-subject_means <- unique(merge(subject_means, results[merge_vars], by="Subject"))
-p <- ggplot(subject_means, aes(x = Latency, fill = Version)) + geom_dotplot(method="histodot", stackgroups=FALSE) + scale_y_continuous(name = "", breaks = NULL)
-print(p)
+# subject_means <- aggregate(Latency ~ Subject, results, mean)
+# merge_vars <- c("Subject", "EVT", "Version", "Age")
+# subject_means <- unique(merge(subject_means, results[merge_vars], by="Subject"))
+# 
+# p <- ggplot(subject_means, aes(x = Latency, fill = Version)) + geom_dotplot(method="histodot", stackgroups=FALSE)
+# print(p)
 ```
 
 ### Model the aggregated data
