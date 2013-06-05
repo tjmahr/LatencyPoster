@@ -15,7 +15,7 @@ library(retimes)
 
 #### Functions for handling LWL data ------------------------------------------
 
-# source('L:/scripts/LookingWhileListeningBeta.r', chdir = TRUE)
+source('L:/scripts/LookingWhileListeningBeta.r', chdir = TRUE)
 
 LoadAllMPData <- function(subject_paths) {
   sessions <- lapply(subject_paths, LoadAndReduceData)
@@ -137,7 +137,8 @@ GetLooksAfterWindow <- function(trial, window) {
 `%lacks%` <- function(x, y) !any(y %in% x)
 IsAllNA <- function(x) all(is.na(x))
 
-
+Count <- function(x) length(x[!is.na(x)])
+Average <- function(x) mean(x, na.rm = TRUE)
 
 
 #### Analysis munging functions -----------------------------------------------

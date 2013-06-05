@@ -33,10 +33,10 @@ PrintDescriptives <- function(results) {
 }
 
 TrimTooFast <- function(results, cutoff = 250) {
-  results$TooFast <- round(results$Latency) < cutoff
+  results$TooFast <- round(results$Latency) <= cutoff
   # How many latencies were too fast within each group
   too_fast <- dcast(results, Version ~ TooFast)
-  names(too_fast) <- sprintf(c("Version", "Num > %1.f ms", "Num < %1.f ms", "Num NA"), cutoff)
+  names(too_fast) <- sprintf(c("Version", "Num > %1.f ms", "Num <= %1.f ms", "Num NA"), cutoff)
   PrettyPrint(too_fast)
   # Store some facts about the trimming
   attr(results, "TrimmedFast") <- length(which(round(results$Latency) < cutoff))
@@ -50,7 +50,7 @@ TrimTooFast <- function(results, cutoff = 250) {
 TrimTooSlow <- function(results, sd_cutoff = 2) {
   sd_limit <- sd_cutoff * sd(results$Latency, na.rm = TRUE)
   cutoff <- mean(results$Latency, na.rm = TRUE) + sd_limit
-  results$TooSlow <- round(results$Latency) > cutoff
+  results$TooSlow <- round(results$Latency) >= cutoff
   # How many latencies were too slow within each group
   too_slow <- dcast(results, Version ~ TooSlow)
   names(too_slow) <- sprintf(c("Version", "Num < %1.f ms", "Num > %1.f ms", "Num NA"), cutoff)
@@ -138,7 +138,7 @@ Table: Response rates for the experiment versions, after trimming.
 
 Yes.
 
-### Is there a relationship between vocab size (either EVT-2 raw score of PPVT-4 raw score) and latency for CS1?
+### _Is there a relationship between vocab size (either EVT-2 raw score of PPVT-4 raw score) and latency for CS1?_
 
 I'm going to compute the average latency within each subject and plot latency as a function of EVT and PPVT.
 
@@ -154,7 +154,7 @@ qplot(data = cs1, x = PPVT, y = Latency) + geom_smooth(method = "lm")
 ```
 
 
-5. Same question for CS2?
+### _Same question for CS2?_
 
 For the aggregated values, there is some correlation between EVT and latency.
 

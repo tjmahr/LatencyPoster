@@ -4,6 +4,7 @@
 
 
 #### Load and reduce the real word trials from both versions ------------------
+source('R/01_functions.r', chdir = TRUE)
 
 # Load only matched subjects
 matching_path <- "data/Latency_AgeMatch.xlsx"
