@@ -196,21 +196,28 @@ means <- aggregate(Latency ~ Subject + Version, data = r_subject, Average)
 v_splits <- dlply(means, "Version", summarize, Latency = Latency)
 t.test(v_splits$CS1, v_splits$CS2) 
 summary(lm(Latency ~ Version, means))
+m <- lm(Latency ~ Version, means)
+summary(m)
+gvlma(m)
+
 
 means <- aggregate(Latency ~ Subject + Condition, data = r_subject, Average)
 c_splits <- dlply(means, "Condition", summarize, Latency = Latency)
 t.test(c_splits[[1]], c_splits[[2]]) 
-summary(lm(Latency ~ Condition, means))
+m <- lm(log(Latency) ~ Condition, means)
+summary(m)
+gvlma(m)
 
+plot(m)
 
 plotter <- ddply(r_subject, Subject ~ Condition + Version, summarize, EVT = unique(EVT), Latency = Average(Latency))
 
-means <- aggregate(Latency ~ Subject + EVT + Age, data = r_subject, Average)
+means <- aggregate(Latency ~ Subject + EVT + Age + Condition + Version, data = r_subject, Average)
 
-m <- lm(Latency ~ EVT + Age, means)
+m <- lm(Latency ~ EVT + Age + Version + Condition, means)
 summary(m)
-
-
+gvlma(m)
+plot(m)
 
 
 
