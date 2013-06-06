@@ -3,11 +3,54 @@
 
 
 
+source('R/01_functions.r', chdir = TRUE)
 
 load("data/results.RData")
 results <- TrimTooFast(results, cutoff = 250)
 
 
+
+
+
+
+
+
+model1 <- lm(Latency ~ Version + EVT + Age, subject_means)
+eps<-residuals(model1)
+eps2<-eps^2
+leps2<-log(eps2)
+model2<-lm(leps2~subject_means$Version+subject_means$EVT+subject_means$Age)
+leps2hat<-fitted(model2)
+eps2hat<-exp(leps2hat)
+sqrtvar<-sqrt(eps2hat)
+# 
+# vartransdata<-cbind(subject_means$Version,subject_means$EVT,subject_means$Age,subject_means$Latency)
+# names(vartransdata)<-c("transversion","transevt",transage","translatency")
+# ##This should work. If you get a message about mismatched dimensions or unequal numbers of rows or columns, use the commented code below, which will definitely work.
+# vartransdata<-vartransdata/sqrtvar
+# ##vartransdata$transversion<-vartransdata$transversion/sqrtvar
+# 
+# ##vartransdata$transevt<-vartransdata$transevt/sqrtvar
+# 
+# ##vartransdata$transage<-vartransdata$transage/sqrtvar
+# 
+# ##vartransdata$translatency<-vartransdata$translatency/sqrtvar
+# 
+# model3<-lm(translatency~transversion+transevt+transage,data=vartransdata)
+# 
+# summary(model3)
+# 
+# 
+
+
+
+
+
+
+TrimByGroup <- function(results, group) {
+  r <- FindCutoffByGroup(results, group)
+  ApplyCutoff(r)
+}
 
 FindCutoffByGroup <- function(results, group = NULL) {
   ddply(results, group, mutate, Cutoff = ComputeUpperBound(Latency),
@@ -19,10 +62,7 @@ ApplyCutoff <- function(results) {
   results
 }
 
-TrimByGroup <- function(results, group) {
-  r <- FindCutoffByGroup(results, group)
-  ApplyCutoff(r)
-}
+
 
 
 r_subject <- TrimByGroup(results, "Subject")
@@ -99,12 +139,6 @@ ddply(results, ~ Condition + Version, summarize,
       NA_Latency = length(which(is.na(Latency))),
       Percent = NA_Latency / (NA_Latency + Real_Latency))
 
-ComputeUpperBound <- function(x) mean(x, na.rm = T) + (2 * sd(x, na.rm = T))
-DropAboveUpperBound <- function(df) {
-  cutoff <- ComputeUpperBound(df$Latency)
-  df$Latency[df$Latency > cutoff] <- NA
-  df
-}
 
 # Pooling both experiments together
 ComputeUpperBound(results$Latency)
@@ -132,7 +166,7 @@ plotter <- ddply(r_subject, Subject ~ Condition + Version, summarize, EVT = uniq
 plotter <- ddply(results, Subject ~ Condition + Version, summarize, EVT = unique(EVT), Latency = Average(Latency))
 
 
-qplot(data = r_subject, x = EVT, y = Latency, color = Condition) + geom_smooth(method = "lm") + facet_grid(~Version)
+qplot(data = plotter, x = EVT, y = Latency, color = Condition) + geom_smooth(method = "lm") + facet_grid(~Version) + labs(title = "Aggregated times, trimmed within subject") + theme_bw()
 
 qplot(data = plotter, x = EVT, y = Latency, color = Condition) + geom_smooth(method = "lm") + facet_grid(~Version)
 
@@ -148,20 +182,33 @@ qplot(data = version_aggregate, x = EVT, y = Latency, color = Version) + geom_sm
 
 
 lmer(Latency ~ EVT + (1|Subject), r_subject)
-lmer(Latency ~ EVT + Age + (1|Subject), r_subject)
+lmer(Latency ~ EVT + Age + Condition + (1|Subject), r_subject)
 lmer(Latency ~ EVT + Age + Condition * Version + (1|Subject), r_subject)
 
 lmer(Latency ~ PPVT + (1|Subject), r_subject)
 lmer(Latency ~ PPVT + EVT + Age + (1|Subject), r_subject)
 
+cs1_means <- subset(means, Version == "CS1")
+cs2_means <- subset(means, Version == "CS2")
 
 
+means <- aggregate(Latency ~ Subject + Version, data = r_subject, Average)
+v_splits <- dlply(means, "Version", summarize, Latency = Latency)
+t.test(v_splits$CS1, v_splits$CS2) 
+summary(lm(Latency ~ Version, means))
+
+means <- aggregate(Latency ~ Subject + Condition, data = r_subject, Average)
+c_splits <- dlply(means, "Condition", summarize, Latency = Latency)
+t.test(c_splits[[1]], c_splits[[2]]) 
+summary(lm(Latency ~ Condition, means))
 
 
+plotter <- ddply(r_subject, Subject ~ Condition + Version, summarize, EVT = unique(EVT), Latency = Average(Latency))
 
+means <- aggregate(Latency ~ Subject + EVT + Age, data = r_subject, Average)
 
-
-
+m <- lm(Latency ~ EVT + Age, means)
+summary(m)
 
 
 

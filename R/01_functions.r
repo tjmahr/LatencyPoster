@@ -10,12 +10,12 @@ library(ggplot2)
 library(lme4)
 library(psych)
 library(lmSupport)
-library(retimes)
+# library(retimes)
 
 
 #### Functions for handling LWL data ------------------------------------------
 
-source('L:/scripts/LookingWhileListeningBeta.r', chdir = TRUE)
+# source('L:/scripts/LookingWhileListeningBeta.r', chdir = TRUE)
 
 LoadAllMPData <- function(subject_paths) {
   sessions <- lapply(subject_paths, LoadAndReduceData)
@@ -137,9 +137,12 @@ GetLooksAfterWindow <- function(trial, window) {
 `%lacks%` <- function(x, y) !any(y %in% x)
 IsAllNA <- function(x) all(is.na(x))
 
+CalculatePercentNA <- function(x) as.percent(Count(x) / length(x))
+as.percent <- function(x, digits = 4) round(x, digits) * 100
 Count <- function(x) length(x[!is.na(x)])
 Average <- function(x) mean(x, na.rm = TRUE)
 
+CalculatePercentNA(x)
 
 #### Analysis munging functions -----------------------------------------------
 
@@ -150,6 +153,7 @@ DetermineVisitNumber <- function(subject_frame) {
 }
 
 
+
 RenumberTrials <- function(subject_frame) {
   offset <- ifelse(unique(subject_frame$Group == "CS2a"), 36, 38)
   trials <- subject_frame$TrialNo
@@ -158,3 +162,75 @@ RenumberTrials <- function(subject_frame) {
   subject_frame
 }
 
+
+
+
+#### Analysis shortcuts -------------------------------------------------------
+
+# These expect something like the "results" dataframe in data/results.Rdata
+
+ComputePercentNA <- function(results) {
+  results$NotNA <- ifelse(is.na(results$Latency), 0, 1)
+  not_na <- dcast(results, Version ~ NotNA, value.var = "NotNA")
+  names(not_na) <- c("Version", "NAs", "Real")
+  not_na <- transform(not_na, PercentNA = round((NAs / (NAs + Real)) * 100, 2))
+  names(not_na) <- c("Version", "NA Latencies", "Real Latencies", "Percent NA")
+  PrettyPrint(not_na)
+}
+
+TrimTooFast <- function(results, cutoff = 250) {
+  results$TooFast <- round(results$Latency) <= cutoff
+  # How many latencies were too fast within each group
+  too_fast <- dcast(results, Version ~ TooFast)
+  names(too_fast) <- sprintf(c("Version", "Num > %1.f ms", "Num <= %1.f ms", "Num NA"), cutoff)
+  PrettyPrint(too_fast)
+  # Store some facts about the trimming
+  attr(results, "TrimmedFast") <- length(which(round(results$Latency) < cutoff))
+  attr(results, "FastCutOff") <- cutoff
+  # Replace too-fast latencies with NA values
+  results$Latency[round(results$Latency) < cutoff] <- NA  
+  results$TooFast <- NULL
+  results
+}
+
+TrimTooSlow <- function(results, sd_cutoff = 2) {
+  sd_limit <- sd_cutoff * sd(results$Latency, na.rm = TRUE)
+  cutoff <- mean(results$Latency, na.rm = TRUE) + sd_limit
+  results$TooSlow <- round(results$Latency) >= cutoff
+  # How many latencies were too slow within each group
+  too_slow <- dcast(results, Version ~ TooSlow)
+  names(too_slow) <- sprintf(c("Version", "Num < %1.f ms", "Num > %1.f ms", "Num NA"), cutoff)
+  PrettyPrint(too_slow)
+  # Store information about the trimming
+  attr(results, "TrimmedSlow") <- length(which(results$Latency > cutoff))
+  attr(results, "SlowCutOff") <- cutoff
+  # Trim slow values
+  results$Latency[results$Latency > too_slow] <- NA
+  results$TooSlow <- NULL
+  results
+}
+
+
+
+ComputeUpperBound <- function(x) Average(x) + (2 * sd(x, na.rm = T))
+
+DropAboveUpperBound <- function(df) {
+  cutoff <- ComputeUpperBound(df$Latency)
+  df$Latency[df$Latency > cutoff] <- NA
+  df
+}
+
+
+
+#### Data output shortcuts ----------------------------------------------------
+
+PrintDescriptives <- function(results) {
+  descriptives <- describeBy(results$Latency, group=results$Version, mat=T, skew=F)
+  rownames(descriptives) <- c("CS1", "CS2")
+  # Convert to a dataframe for table-printing
+  descriptives <- t(descriptives)[-c(1:3), ]
+  descriptives <- as.data.frame(descriptives)
+  PrettyPrint(descriptives)
+}
+
+PrettyPrint <- function(x) suppressWarnings(print(ascii(x), type = "pandoc"))
