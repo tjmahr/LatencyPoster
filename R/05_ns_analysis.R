@@ -1,51 +1,5 @@
-
-
-
-
-
 source('R/01_functions.r', chdir = TRUE)
-
 load("data/results.RData")
-results <- TrimTooFast(results, cutoff = 250)
-
-
-
-
-
-
-
-
-model1 <- lm(Latency ~ Version + EVT + Age, subject_means)
-eps<-residuals(model1)
-eps2<-eps^2
-leps2<-log(eps2)
-model2<-lm(leps2~subject_means$Version+subject_means$EVT+subject_means$Age)
-leps2hat<-fitted(model2)
-eps2hat<-exp(leps2hat)
-sqrtvar<-sqrt(eps2hat)
-# 
-# vartransdata<-cbind(subject_means$Version,subject_means$EVT,subject_means$Age,subject_means$Latency)
-# names(vartransdata)<-c("transversion","transevt",transage","translatency")
-# ##This should work. If you get a message about mismatched dimensions or unequal numbers of rows or columns, use the commented code below, which will definitely work.
-# vartransdata<-vartransdata/sqrtvar
-# ##vartransdata$transversion<-vartransdata$transversion/sqrtvar
-# 
-# ##vartransdata$transevt<-vartransdata$transevt/sqrtvar
-# 
-# ##vartransdata$transage<-vartransdata$transage/sqrtvar
-# 
-# ##vartransdata$translatency<-vartransdata$translatency/sqrtvar
-# 
-# model3<-lm(translatency~transversion+transevt+transage,data=vartransdata)
-# 
-# summary(model3)
-# 
-# 
-
-
-
-
-
 
 TrimByGroup <- function(results, group) {
   r <- FindCutoffByGroup(results, group)
@@ -64,179 +18,204 @@ ApplyCutoff <- function(results) {
 
 
 
+qplot(data = results, x = Latency, fill = Condition) + facet_grid(Version~Condition)
+
+results <- FindCutoffByGroup(results, "Subject")
+qplot(data = results, x = Latency, fill = Drop) + facet_wrap(TargetWord~., ncol = 4)
+
+ComputePercentNA(results)
+PrintDescriptives(results)
+
+# Trim impossibly fast latencies. Trim slow latencies within each subject.
+results <- TrimTooFast(results, cutoff = 250)
+results <- TrimByGroup(results, group = ~ Version + Condition)
+
+mean_sd <- function(x) {
+  avg <- round(Average(x))
+  SD <- round(sd(x, na.rm = TRUE))
+  paste0(avg, " (", SD, ")")
+}
+
+aggregate(Latency ~ Version + Condition, data = results, mean_sd)
+
+
+
+
+
+
+
+
+
+
+
+
+
+rw <- subset(subject_means, Condition == "real")
+
+m <- lmer(Latency ~ PPVT + Age + Condition * Version + (Condition|Subject), results)
+Anova(m, type = 3, test = "F")
+
+
+cs1_full <- subset(results, Version == "CS1")
+cs2_full <- subset(results, Version == "CS2")
+
+m <- lmer(Latency ~ EVT + Age + Condition + (Condition|Subject), cs1_full)
+Anova(m, type = 3, test = "F")
+
+
+m <- lmer(Latency ~ EVT + Age + Condition + (Condition|Subject), cs2_full)
+Anova(m, type = 3, test = "F")
+
+
+
+
+### put table in poster
+m_x1 <- lm(Latency ~ EVT + Age + Condition, cs1)
+summary(m_x1)
+
+### put table in poster
+m_x2 <- lm(Latency ~ EVT + Age + Condition, cs2)
+summary(m_x2)
+
+
+m_r1 <- lm(Latency ~ EVT + Age, rw1)
+summary(m_r1)
+
+m_r2 <- lm(Latency ~ EVT + Age, rw2)
+summary(m_r2)
+
+m_n1 <- lm(Latency ~ EVT + Age, ns1)
+summary(m_n1)
+
+m_n2 <- lm(Latency ~ EVT + Age, ns2)
+summary(m_n2)
+
+m_n2 <- lm(Latency ~ EVT + Age, cs2)
+summary(m_n2)
+
+
+
+
+
+
+
+
+
+
+
+
+x <- results$Latency
+
+Average(results$Latency) + 2 * sd(results$Latency, na.rm = TRUE)
+
+
+
+
+results <- DropAboveUpperBound(results)
+
+
+FindCutoffByGroup(results, "Subject")
+
+
+
+describeBy(results$Latency, group = c(results$Version, results$Condition))
+
+
+
+subject_means <- aggregate(Latency ~ Subject + Age + PPVT + EVT + Version + Condition, data = results, Average)
+
+
+qplot(data = subject_means, x = Age, y = Latency, color = Condition) + facet_grid(~Version) + geom_smooth(method = "lm")
+
+
+qplot(data = subject_means, x = PPVT, y = Latency, color = Condition) + facet_grid(~Version) + geom_smooth(method = "lm")
+
+rw1 <- subset(subject_means, Condition == "real" & Version == "CS1")
+rw2 <- subset(subject_means, Condition == "real" & Version == "CS2")
+ns1 <- subset(subject_means, Condition == "nonsense" & Version == "CS1")
+ns2 <- subset(subject_means, Condition == "nonsense" & Version == "CS2")
+
+cs1 <- subset(subject_means, Version == "CS1")
+cs2 <- subset(subject_means, Version == "CS2")
+
+
+
+
+
+m <- lmer(Latency ~ EVT + Age + (1|Subject), r_subject)
+m
+
+# Look at CI's for each subject
+ms <- lmList(Latency ~ Condition | Subject, r_subject)
+plot(confint(ms))
+
+# Look at the effect of trial
+qplot(data = r_subject, x = Trial, y = Latency, color = Version) + geom_smooth(method = "lm")
+qplot(data = r_subject, x = Trial, y = Latency, color = Version) + 
+  geom_smooth(method = "lm") + facet_wrap(~Subject, ncol = 4)
+
+
+
+aggregate(Latency ~ Version + Condition, data = r_subject, Average)
+
+
+# Adjust latency for age
+subject_means <- aggregate(Latency ~ Subject + EVT + Age + PPVT + Version, 
+                           data = r_subject, Average)
+subject_means$AgeC <- subject_means$Age - mean(subject_means$Age)
+
+m <- lm(Latency ~ Age + EVT, subject_means)
+summary(m)
+
+m <- lm(Latency ~ AgeC + EVT, subject_means)
+summary(m)
+
+adjustment <- subject_means$AgeC * m$coefficients["AgeC"]
+subject_means$AdjLatency <- subject_means$Latency - adjustment
+
+qplot(data = subject_means, x = EVT, y = Latency) + geom_smooth(method = "lm")
+qplot(data = subject_means, x = EVT, y = AdjLatency) + geom_smooth(method = "lm")
+
+
+qplot(data = subject_means, x = Age, y = Latency) + geom_smooth(method = "lm")
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Try the Feasible GLS
+model1 <- lm(Latency ~ Version + EVT + Age, subject_means)
+summary(model1)
+
+eps <- residuals(model1)
+eps2 <- eps^2
+subject_means$leps2 <- log(eps2)
+
+model2 <- lm(leps2 ~  Version + EVT + Age, subject_means)
+summary(model2)
+
+leps2hat <- fitted(model2)
+eps2hat <- exp(leps2hat)
+sqrtvar <- sqrt(eps2hat)
+ 
+transdata <- subject_means[c("Version", "EVT", "Age", "Latency")]
+names(transdata) <- paste0("Trans", names(transdata))
+
+transdata$TransVersion <- as.integer(transdata$TransVersion) - 1.5
+transdata <- transdata / sqrtvar
+
+model3 <- lm(TransLatency ~ TransVersion + TransEVT + TransAge, transdata)
+summary(model3)
+
+
 
 r_subject <- TrimByGroup(results, "Subject")
 
-
-
-
-
-
-
-
-r_target <- FindCutoffByGroup(results, "TargetWord")
-qplot(data = r_target, x = Latency, fill = Drop)
-r_target <- ApplyCutoff(r_target)
-
-
-r_version <- FindCutoffByGroup(results, "Version")
-qplot(data = r_version, x = Latency, fill = Drop)
-
-r_subject <- FindCutoffByGroup(results, "Subject")
-qplot(data = r_subject, x = Latency, fill = Drop)
-r_subject <- ApplyCutoff(r_subject)
-
-r_all <- FindCutoffByGroup(results)
-r_all <- ApplyCutoff(r_all)
-
-
-r3 <- ddply(results, "Subject", mutate, Average = Average(Latency), Cutoff = ComputeUpperBound(Latency), Drop = ifelse(Latency > Cutoff, "Drop", "Keep"))
-
-qplot(data = r3, x = Latency, fill = Drop) + facet_wrap(~Subject,)
-
-
-
-r2 <- ddply(results, "Version", mutate, Average = Average(Latency), Cutoff = ComputeUpperBound(Latency))
-r2$Drop <- with(r2, ifelse(Latency > Cutoff, "Drop", "Keep"))
-qplot(data = r2, x = Latency, fill = Drop) + facet_wrap(~Version, ncol = 1)
-
-
-
-qplot(data = r, x = Latency, fill = Drop)
-
-qplot(data = r, x = Latency) + facet_wrap(~TargetWord, ncol = 2) + geom_vline(aes(xintercept = Cutoff), color = "red")
-
-
-ddply(results, "Subject", summarize, Average = Average(Latency), 
-      Cutoff = ComputeUpperBound(Latency), Count(which(Latency > Cutoff)), Count(Latency))
-
-
-
-
-
-
-
-
-
-
-
-rw <- subset(results, Condition == "real")
-ns <- subset(results, Condition == "nonsense")
-
-v1 <- subset(results, Version == "CS1")
-v2 <- subset(results, Version == "CS2")
-
-t.test(rw$Latency, ns$Latency)
-t.test(v1$Latency, v2$Latency)
-
-PrintDescriptives(rw)
-PrintDescriptives(ns)
-
-
-ddply(results, ~ Condition + Version, summarize, Latency = mean(Latency, na.rm = TRUE))
-ddply(results, ~ Condition + Version, summarize, 
-      Real_Latency = length(which(!is.na(Latency))),
-      NA_Latency = length(which(is.na(Latency))),
-      Percent = NA_Latency / (NA_Latency + Real_Latency))
-
-
-# Pooling both experiments together
-ComputeUpperBound(results$Latency)
-# Separating the two experiments
-by(results$Latency, results$Version, ComputeUpperBound)
-
-cs1 <- subset(results, Version == "CS1")
-cs1 <- DropAboveUpperBound(cs1)
-cs2 <- subset(results, Version == "CS2")
-cs2 <- DropAboveUpperBound(cs2)
-results <- rbind(cs1, cs2)
-
-qplot(data = results, x = Latency) + facet_grid(~ Version)
-PrintDescriptives(results)
-
-means <- aggregate(Latency ~ Subject + Version + Condition, data = results, Average)
-
-
-
-
-
-
-names(results)
-plotter <- ddply(r_subject, Subject ~ Condition + Version, summarize, EVT = unique(EVT), Latency = Average(Latency))
-plotter <- ddply(results, Subject ~ Condition + Version, summarize, EVT = unique(EVT), Latency = Average(Latency))
-
-
-qplot(data = plotter, x = EVT, y = Latency, color = Condition) + geom_smooth(method = "lm") + facet_grid(~Version) + labs(title = "Aggregated times, trimmed within subject") + theme_bw()
-
-qplot(data = plotter, x = EVT, y = Latency, color = Condition) + geom_smooth(method = "lm") + facet_grid(~Version)
-
-r_all <- TrimByGroup(results, NULL)
-aggregate <- ddply(r_all, "Subject", summarize, EVT = unique(EVT), Latency = Average(Latency))
-condition_aggregate <- ddply(r_all, Subject ~ Condition, summarize, EVT = unique(EVT), Latency = Average(Latency))
-version_aggregate <- ddply(r_all, Subject ~ Version, summarize, EVT = unique(EVT), Latency = Average(Latency))
-
-qplot(data = aggregate, x = EVT, y = Latency) + geom_smooth(method = "lm")
-qplot(data = condition_aggregate, x = EVT, y = Latency, color = Condition) + geom_smooth(method = "lm")
-qplot(data = version_aggregate, x = EVT, y = Latency, color = Version) + geom_smooth(method = "lm")
-
-
-
-lmer(Latency ~ EVT + (1|Subject), r_subject)
-lmer(Latency ~ EVT + Age + Condition + (1|Subject), r_subject)
-lmer(Latency ~ EVT + Age + Condition * Version + (1|Subject), r_subject)
-
-lmer(Latency ~ PPVT + (1|Subject), r_subject)
-lmer(Latency ~ PPVT + EVT + Age + (1|Subject), r_subject)
-
-cs1_means <- subset(means, Version == "CS1")
-cs2_means <- subset(means, Version == "CS2")
-
-
-means <- aggregate(Latency ~ Subject + Version, data = r_subject, Average)
-v_splits <- dlply(means, "Version", summarize, Latency = Latency)
-t.test(v_splits$CS1, v_splits$CS2) 
-summary(lm(Latency ~ Version, means))
-m <- lm(Latency ~ Version, means)
-summary(m)
-gvlma(m)
-
-
-means <- aggregate(Latency ~ Subject + Condition, data = r_subject, Average)
-c_splits <- dlply(means, "Condition", summarize, Latency = Latency)
-t.test(c_splits[[1]], c_splits[[2]]) 
-m <- lm(log(Latency) ~ Condition, means)
-summary(m)
-gvlma(m)
-
-plot(m)
-
-plotter <- ddply(r_subject, Subject ~ Condition + Version, summarize, EVT = unique(EVT), Latency = Average(Latency))
-
-means <- aggregate(Latency ~ Subject + EVT + Age + Condition + Version, data = r_subject, Average)
-
-m <- lm(Latency ~ EVT + Age + Version + Condition, means)
-summary(m)
-gvlma(m)
-plot(m)
-
-
-
-
-qplot(data = r_subject, x = EVT, y = Latency) + geom_smooth(method = "lm")
-Anova(m, test.statistic="F", type = 3)
-m <- lm(Latency ~ Version , means)
-summary(m)
-
-
-  
-  ddply(results, Subject ~ Condition + Version, summarize, Latency = Count(Latency))
-  
-
-results$Condition <- factor(results$Condition) 
-aggregate()
-
-
-
-qplot(data = results, x = EVT, y = Latency, color = Condition) + geom_smooth(method = "lm") + facet_grid(~ Version)
-
-?geom_point

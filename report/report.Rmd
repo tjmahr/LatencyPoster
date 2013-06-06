@@ -1,7 +1,17 @@
-# Do orienting stimuli create additional task demands in the looking-while-listening paradigm?
+## Introduction and Rationale
 
-## Introduction
-The looking-while-listening paradigm [LWL; @FernaldLWL] uses eye-tracking to study lexical comprehension in young children. In this procedure, two images are presented on a computer screen followed by a prompt to look at one of the images. The data gathered through eye-tracking not only records _where_ the child looks onscreen but _when_ the child fixates on a particular image. The latency between the onset of a speech stimulus and an appropriate change of gaze location provides a measure of how rapidly the child accesses the word's lexical representation. Reaction time is related to vocabulary size in young children and is also predictive of later language abilities [@FernaldHalfAWord; @MarchmanLangOutcomes]. 
+* The 2AFC looking-while-listening paradigm  [LWL; @FernaldLWL] has become widely used to examine lexical processing in young children.
+* The speed at which children look to familiar objects when hearing the object-name at 18 months reliably predicts vocabulary size up to 8 years of age [@MarchmanLangOutcomes].  
+    - However, these reaction time measures are not easily obtained.
+    - Reaction time is a measure of how quickly a child looks to a picture when its object name is presented.  Therefore, reaction time can be measured only on trials where the child is _not_ looking at the target picture at the onset of the target word.
+    - In a 2AFC paradigm, only about 50% of trials provide reaction time data. 
+    - Usually, even fewer trials provide reaction time data because there are always some trials where young children are not fixating on a picture at target word onset.
+    - This is a considerable problem, given the small number of trials in LWL studies (usually between 24 and 36).
+* Adults can be instructed to fixate on a central orienting stimuli, but young children cannot be similarly instructed.
+* This study used an animated centering stimulus in an attempt to increase the number of trials with useable reaction times.
+
+
+The looking-while-listening paradigm [LWL; @FernaldLWL] uses eye-tracking to study lexical comprehension in young children. In this procedure, two images are presented on a computer screen followed by a prompt to look at one of the images. The data gathered through eye-tracking not only records _where_ the child looks onscreen but _when_ the child fixates on a particular image. The latency between the onset of a speech stimulus and an appropriate change of gaze location provides a measure of how rapidly the child accesses the word's lexical representation. Reaction time is related to vocabulary size in young children and is also predictive of later language abilities [@FernaldHalfAWord; ]. 
 
 Reaction times provide valuable information about the real-time processing of speech signal in children, but these data are not easily obtained. In a 2-alternative forced choice (2AFC) LWL paradigm, there is a 50% chance the child will be fixated on the target image at onset of the speech stimulus, so only half the trials will provide latency data. This problem is readily resolved in studies with adults by instructing participants to fixate on a central orienting image until they hear the stimulus. Unfortunately, young children cannot be similarly instructed.
 
