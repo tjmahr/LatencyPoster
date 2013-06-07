@@ -3,17 +3,19 @@
 * The 2AFC looking-while-listening paradigm [LWL; @FernaldLWL] has become widely used to examine lexical processing in young children.
 * The speed at which children look to familiar objects when hearing the object-name at 18 months reliably predicts vocabulary size up to 8 years of age [@MarchmanLangOutcomes].  
     - However, these reaction time measures are not easily obtained.
-    - Reaction time is a measure of how quickly a child looks to a picture when its object name is presented.  Therefore, reaction time can be measured only on trials where the child is _not_ looking at the target picture at the onset of the target word.
+    - Reaction time provides a measure of how quickly a child looks to a picture when its object name is presented.  Therefore, reaction time can be measured only on trials where the child is _not_ looking at the target picture at the onset of the target word.
     - In a 2AFC paradigm, only about 50% of trials provide reaction time data. 
     - Usually, even fewer trials provide reaction time data because there are always some trials where young children are not fixating on a picture at target word onset.
     - This is a considerable problem, given the small number of trials in LWL studies (usually between 24 and 36).
 * Adults can be instructed to fixate on a central orienting stimuli, but young children cannot be similarly instructed.
-* This study used an animated centering stimulus in an attempt to increase the number of trials with useable reaction times.
+* This study used an animated centering stimulus in an attempt to increase the number of LWL trials with useable reaction times.
 
 ## METHOD
 
 ### Conditions
+
 Condition 1: No animated centering stimulus.
+
 Condition 2: Animated centering stimulus.
 
 * Centering stimulus was an abstract geometric animation. It appeared onscreen after two images had been presented for 2000\ ms. (__Describe and maybe show example__)
@@ -39,8 +41,11 @@ scores <- ddply(results, ~ Subject + Age + EVT + PPVT + Version, summarize,
 scores <- melt(scores, id.vars=c("Subject", "Version"))
 scores <- dcast(scores, Version ~ variable, DisplayMeanRange)
 # Prep table
-names(scores) <- c("&nbsp;", "Age (months)", "EVT-2", "PPVT-4")
+names(scores) <- c("&nbsp;", "Age (months)", "EVT-2 standard score", "PPVT-4 standard score")
+# Overwrite with standard scores
+scores[, 3] <- c("129.8 (111--149)", "122.5 (92--146)")
 PrettyPrint(scores, include.rownames = FALSE)
+
 ```
 
 ### Methodology
@@ -162,6 +167,8 @@ subject_means <- aggregate(Latency ~ Subject + Age + EVT + Version + Condition,
 subject_means <- mutate(subject_means, Condition = ifelse(Condition == "real", "CP", "NW"))
 cs1 <- subset(subject_means, Version == "CS1")
 cs2 <- subset(subject_means, Version == "CS2")
+m1 <- lm(Latency ~ EVT + Age + Condition, cs1)
+m2 <- lm(Latency ~ EVT + Age + Condition, cs2)
 ```
 
 ```{r, echo=FALSE, eval=FALSE}
@@ -178,7 +185,6 @@ Anova(m, type = 3, test = "F")
 plotter <- mutate(subject_means, 
                   Trial = ifelse(Condition == "CP", "Correct Production", "Nonword"), 
                   Version = ifelse(Version == "CS1", "Condition 1", "Condition 2"))
-
 ggplot(data = plotter, aes(x = EVT, y = Latency, color = Trial)) + 
   geom_point(size = 2.5) + facet_grid(~Version) + 
   geom_smooth(method = "lm", level = .68) + theme_bw() + 
@@ -189,19 +195,23 @@ ggplot(data = plotter, aes(x = EVT, y = Latency, color = Trial)) +
 
 
 #### Regression Results:  Condition 1
-* Age, trial type, and EVT-2 were significant predictors of latency.
+
+* Age, trial type, and EVT-2 were significant predictors of latency, _R_^2\ =\ `r PrintR2(m1)`, _F_`r PrintFDfs(m1)`, _p_\ =\ `r PrintFp(m1, 3)`.
 
 ```{r, echo=FALSE, results = 'asis', echo = FALSE, warning=FALSE}
-m1 <- lm(Latency ~ EVT + Age + Condition, cs1)
 PrettyPrint(summary(m1))
 ```
 
 
+
+
+
+
 #### Regression Results: Condition 2
-* None of the independent variables were significant predictors of latency.
+* None of the independent variables were significant predictors of latency, _R_^2\ =\ `r PrintR2(m2)`, _F_`r PrintFDfs(m2)`, _p_\ =\ `r PrintFp(m2, 3)`.
+
 
 ```{r, results = 'asis', echo = FALSE, warning=FALSE}
-m2 <- lm(Latency ~ EVT + Age + Condition, cs2)
 PrettyPrint(summary(m2))
 ```
 

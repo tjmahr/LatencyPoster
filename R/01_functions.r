@@ -254,6 +254,20 @@ mean_sd <- function(x) {
 }
 
 
+PrintR2 <- function(model) {
+  round(summary(model)$r.squared, 3)
+}
+
+PrintFDfs <- function(model) {
+  f_stat <- summary(model)$fstatistic
+  sprintf("(%d, %d)\\ =\\ %.2f", f_stat[2], f_stat[3], f_stat[1])
+}
+
+PrintFp <- function(model, p_digits = 3) {
+  f_stat <- summary(model)$fstatistic
+  p_value <- round(1 - pf(f_stat[1], f_stat[2], f_stat[3]), p_digits) 
+  as.numeric(p_value)
+}
 
 
 

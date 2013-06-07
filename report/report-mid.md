@@ -3,17 +3,19 @@
 * The 2AFC looking-while-listening paradigm [LWL; @FernaldLWL] has become widely used to examine lexical processing in young children.
 * The speed at which children look to familiar objects when hearing the object-name at 18 months reliably predicts vocabulary size up to 8 years of age [@MarchmanLangOutcomes].  
     - However, these reaction time measures are not easily obtained.
-    - Reaction time is a measure of how quickly a child looks to a picture when its object name is presented.  Therefore, reaction time can be measured only on trials where the child is _not_ looking at the target picture at the onset of the target word.
+    - Reaction time provides a measure of how quickly a child looks to a picture when its object name is presented.  Therefore, reaction time can be measured only on trials where the child is _not_ looking at the target picture at the onset of the target word.
     - In a 2AFC paradigm, only about 50% of trials provide reaction time data. 
     - Usually, even fewer trials provide reaction time data because there are always some trials where young children are not fixating on a picture at target word onset.
     - This is a considerable problem, given the small number of trials in LWL studies (usually between 24 and 36).
 * Adults can be instructed to fixate on a central orienting stimuli, but young children cannot be similarly instructed.
-* This study used an animated centering stimulus in an attempt to increase the number of trials with useable reaction times.
+* This study used an animated centering stimulus in an attempt to increase the number of LWL trials with useable reaction times.
 
 ## METHOD
 
 ### Conditions
+
 Condition 1: No animated centering stimulus.
+
 Condition 2: Animated centering stimulus.
 
 * Centering stimulus was an abstract geometric animation. It appeared onscreen after two images had been presented for 2000\ ms. (__Describe and maybe show example__)
@@ -29,11 +31,11 @@ Condition 2: Animated centering stimulus.
 * Participants in the two groups closely matched on the basis of age, sex, and PPVT-4 standard score.
 
 
-**&nbsp;**   **Age (months)**   **EVT-2**       **PPVT-4**       
------------- ------------------ --------------- -----------------
-CS1          39.44 (30--46)     62 (37--90)     90.2 (50--128)   
-CS2          40.52 (31--48)     56.6 (27--90)   77.04 (45--118)  
------------- ------------------ --------------- -----------------
+**&nbsp;**   **Age (months)**   **EVT-2 standard score**   **PPVT-4 standard score**  
+------------ ------------------ -------------------------- ---------------------------
+CS1          39.44 (30--46)     129.8 (111--149)           90.2 (50--128)             
+CS2          40.52 (31--48)     122.5 (92--146)            77.04 (45--118)            
+------------ ------------------ -------------------------- ---------------------------
 
 
 ### Methodology
@@ -131,7 +133,8 @@ CS2          40.52 (31--48)     56.6 (27--90)   77.04 (45--118)
 
 
 #### Regression Results:  Condition 1
-* Age, trial type, and EVT-2 were significant predictors of latency.
+
+* Age, trial type, and EVT-2 were significant predictors of latency, _R_^2\ =\ 0.285, _F_(3, 46)\ =\ 6.11, _p_\ =\ 0.001.
 
 
               **Estimate**   **Std. Error**   **t value**   **Pr(>|t|)**  
@@ -144,8 +147,13 @@ ConditionNW   -89.78         40.88            -2.20         0.03
 
 
 
+
+
+
+
 #### Regression Results: Condition 2
-* None of the independent variables were significant predictors of latency.
+* None of the independent variables were significant predictors of latency, _R_^2\ =\ 0.096, _F_(3, 46)\ =\ 1.62, _p_\ =\ 0.197.
+
 
 
               **Estimate**   **Std. Error**   **t value**   **Pr(>|t|)**  
