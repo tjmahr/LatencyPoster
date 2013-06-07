@@ -1,22 +1,6 @@
 source('R/01_functions.r', chdir = TRUE)
 load("data/results.RData")
 
-TrimByGroup <- function(results, group) {
-  r <- FindCutoffByGroup(results, group)
-  ApplyCutoff(r)
-}
-
-FindCutoffByGroup <- function(results, group = NULL) {
-  ddply(results, group, mutate, Cutoff = ComputeUpperBound(Latency),
-        Drop = ifelse(Latency > Cutoff, "Drop", "Keep"))
-}
-
-ApplyCutoff <- function(results) {
-  results$Latency[results$Drop == "Drop"] <- NA
-  results
-}
-
-
 
 
 
@@ -79,6 +63,11 @@ Anova(m, type = 3, test = "F")
 
 
 
+subject_means <- aggregate(Latency ~ Subject + Age + PPVT + EVT + Version + Condition, 
+                           data = results, Average)
+
+cs1 <- subset(subject_means, Version == "CS1")
+cs2 <- subset(subject_means, Version == "CS2")
 
 ### put table in poster
 m_x1 <- lm(Latency ~ EVT + Age + Condition, cs1)
@@ -89,19 +78,24 @@ m_x2 <- lm(Latency ~ EVT + Age + Condition, cs2)
 summary(m_x2)
 
 
-m_r1 <- lm(Latency ~ EVT + Age, rw1)
+rw1 <- subset(subject_means, Condition == "real" & Version == "CS1")
+rw2 <- subset(subject_means, Condition == "real" & Version == "CS2")
+ns1 <- subset(subject_means, Condition == "nonsense" & Version == "CS1")
+ns2 <- subset(subject_means, Condition == "nonsense" & Version == "CS2")
+
+m_r1 <- lm(Latency ~ PPVT + EVT + Age, rw1)
 summary(m_r1)
 
-m_r2 <- lm(Latency ~ EVT + Age, rw2)
+m_r2 <- lm(Latency ~ PPVT + EVT + Age, rw2)
 summary(m_r2)
 
-m_n1 <- lm(Latency ~ EVT + Age, ns1)
+m_n1 <- lm(Latency ~ PPVT + EVT + Age, ns1)
 summary(m_n1)
 
-m_n2 <- lm(Latency ~ EVT + Age, ns2)
+m_n2 <- lm(Latency ~ PPVT + EVT + Age, ns2)
 summary(m_n2)
 
-m_n2 <- lm(Latency ~ EVT + Age, cs2)
+m_n2 <- lm(Latency ~ PPVT + EVT + Age, cs2)
 summary(m_n2)
 
 
@@ -132,11 +126,6 @@ FindCutoffByGroup(results, "Subject")
 describeBy(results$Latency, group = c(results$Version, results$Condition))
 
 
-
-subject_means <- aggregate(Latency ~ Subject + Age + PPVT + EVT + Version + Condition, data = results, Average)
-
-
-qplot(data = subject_means, x = Age, y = Latency, color = Condition) + facet_grid(~Version) + geom_smooth(method = "lm")
 
 
 qplot(data = subject_means, x = PPVT, y = Latency, color = Condition) + facet_grid(~Version) + geom_smooth(method = "lm")

@@ -4,10 +4,6 @@ library(ggplot2)
 
 setwd("report")
 
-
-
-
-
 # Knit the reports
 knit(input="report.Rmd", output="report-mid.md")
 

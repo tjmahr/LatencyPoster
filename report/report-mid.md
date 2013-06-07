@@ -29,11 +29,11 @@ Condition 2: Animated centering stimulus.
 * Participants in the two groups closely matched on the basis of age, sex, and PPVT-4 standard score.
 
 
------ ---------------- --------------- -----------------
-      Age (months)     EVT-2           PPVT-4           
-CS1   39.44 (30--46)   62 (37--90)     90.2 (50--128)   
-CS2   40.52 (31--48)   56.6 (27--90)   77.04 (45--118)  
------ ---------------- --------------- -----------------
+**&nbsp;**   **Age (months)**   **EVT-2**       **PPVT-4**       
+------------ ------------------ --------------- -----------------
+CS1          39.44 (30--46)     62 (37--90)     90.2 (50--128)   
+CS2          40.52 (31--48)     56.6 (27--90)   77.04 (45--118)  
+------------ ------------------ --------------- -----------------
 
 
 ### Methodology
@@ -89,8 +89,6 @@ CS2   40.52 (31--48)   56.6 (27--90)   77.04 (45--118)
 
 
 
-
-
 * Condition 1:
     - CP trials: Latencies available in 32.7% of trials (additional 4.8% trimmed)
     - NW trials: Latencies available in 30.5% of trials (additional 5.8% trimmed)
@@ -104,44 +102,73 @@ CS2   40.52 (31--48)   56.6 (27--90)   77.04 (45--118)
 
 
 
+![Figure 2. Histograms of latencies (ms) for condition 1 (top) and condition 2 (bottom) for CP trials (left) and NW trials (right).](figure/unnamed-chunk-5.png) 
 
 
-![Figure 2. Histograms of latencies (in ms) for condition 1 (top) and condition 2 (bottom) for CP trials.](figure/unnamed-chunk-5.png) 
 
 
-![Figure 2. Histograms of latencies (in ms) for condition 1 (top) and condition 2 (bottom) for CP trials.](figure/unnamed-chunk-6.png) 
 
 
-![Figure 3. Histograms of latencies (in ms) for condition 1 (top) and condition 2 (bottom) for NW trials.](figure/unnamed-chunk-7.png) 
 
 
 
 
 ### Regression analyses
-* Do age, receptive vocabulary size, or expressive vocabulary size predict latency for either the CP or the NW trials in the two conditions?
-* We ran four separate multiple regression analyses with four dependent variables.  These were mean latencies for each subject by condition (1 or 2), and by trial type (CP or NW).
-* Independent variables were age, PPVT-4 raw score (receptive vocabulary size) and EVT-2 raw score (expressive vocabulary size).
 
-### Regression Results:  Condition 1
+* Do age, expressive vocabulary size or trial type predict latency in either conditions?
+* We ran two separate multiple regression analyses, one for each condition. The dependent variable was the mean latencies for each subject for each trial type (CP or NW).
+* Independent variables were age, trial type (CP or NW), and EVT-2 raw score (expressive vocabulary size).
+* The regression results were also checked against a mixed effects model that used by-subject random intercepts and random slopes for trial type rather than aggregating latencies into subject means.
+
+
+
+
+
+
+
+![Figure 2. Relationship between EVT-2 and mean latencies for each subject by condition and trial](figure/unnamed-chunk-10.png) 
+
+
+
+#### Regression Results:  Condition 1
 * Age, trial type, and EVT-2 were significant predictors of latency.
 
 
+              **Estimate**   **Std. Error**   **t value**   **Pr(>|t|)**  
+------------- -------------- ---------------- ------------- --------------
+(Intercept)   423.97         171.89           2.47          0.02          
+EVT           -6.65          2.15             -3.10         0.00          
+Age           18.70          5.41             3.46          0.00          
+ConditionNW   -89.78         40.88            -2.20         0.03          
+------------- -------------- ---------------- ------------- --------------
 
 
 
-### Regression Results: Condition 2
+#### Regression Results: Condition 2
 * None of the independent variables were significant predictors of latency.
 
 
+              **Estimate**   **Std. Error**   **t value**   **Pr(>|t|)**  
+------------- -------------- ---------------- ------------- --------------
+(Intercept)   979.01         129.30           7.57          0.00          
+EVT           -1.39          1.24             -1.12         0.27          
+Age           -3.79          3.66             -1.04         0.31          
+ConditionNW   -9.11          30.29            -0.30         0.76          
+------------- -------------- ---------------- ------------- --------------
 
 
-### Discussion
+## Discussion
+
+
+
+
+
 * These results suggest that using an animated centering stimulus will yield more useable latency data.
-    - About ??% of trials had useable latencies when a animated centering stimulus was used, as compared to ??% when it was not used.
+    - About 54.35% of trials had useable latencies when an animated centering stimulus was used, compared to r percents$CS1`% when it was not used.
 * The fact that reaction times were not significantly different across the two conditions suggests that the animated centering stimulus does not create additional task demands.
 * As in previous research, vocabulary size was a significant predictor of latency in condition 1 without the animated centering stimulus
 * However, neither vocabulary size nor age was a significant predictor of latency when an animated centering stimulus was used.
-* This result suggests that the effect of age and vocabulary size on latency may be due, at least in part, to older children and children with larger vocabularies having better attention to task.  When an animated centering stimulus is used to maintain attention, the effect of age and vocabulary size on latency is no longer observed.
+* This result suggests that the effect of age and vocabulary size on latency may be due, at least in part, to older children and children with larger vocabularies having better attention to task. When an animated centering stimulus is used to maintain attention, the effect of age and vocabulary size on latency is no longer observed.
 * To conclude, the use of an animated centering stimulus does not create additional task demands. Instead, it results in more useable latency data and better attention to task.
 
 
@@ -151,7 +178,10 @@ Thanks to Franzo Law II, Alissa Schneeberg, Danielle Lee, David Kaplan, Morgan M
 
 This research was supported by NIDCD Grant R01-02932 to Jan Edwards, Mary Beckman, and Benjamin Munson and NICHD Grant P30-HD03352 to the Waisman Center.
 
+#### Reproducible Research!
 
+Data-set and supporting `R` scripts available on `github.com/tjmahr/LatencyPoster`
 
+![](qrcode_small.png)
 
-## References
+### References

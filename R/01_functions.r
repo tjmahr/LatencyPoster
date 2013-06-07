@@ -1,4 +1,4 @@
-library(xlsx)
+library(knitr)
 library(ascii)
 library(stringr)
 
@@ -183,12 +183,9 @@ DisplayPercentNA <- function(results) {
 TrimTooFast <- function(results, cutoff = 250) {
   results$TooFast <- round(results$Latency) <= cutoff
   # How many latencies were too fast within each group
-  too_fast <- dcast(results, Version ~ TooFast)
+  too_fast <- dcast(results, Version ~ TooFast, length, value.var = "TooFast")
   names(too_fast) <- sprintf(c("Version", "Num > %1.f ms", "Num <= %1.f ms", "Num NA"), cutoff)
   PrettyPrint(too_fast, digits = 0, include.rownames = FALSE)
-  # Store some facts about the trimming
-  attr(results, "TrimmedFast") <- length(which(round(results$Latency) < cutoff))
-  attr(results, "FastCutOff") <- cutoff
   # Replace too-fast latencies with NA values
   results$Latency[round(results$Latency) < cutoff] <- NA  
   results$TooFast <- NULL
@@ -202,9 +199,6 @@ TrimTooSlow <- function(results, sd_cutoff = 2) {
   too_slow <- dcast(results, Version ~ TooSlow)
   names(too_slow) <- sprintf(c("Version", "Num < %1.f ms", "Num > %1.f ms", "Num NA"), cutoff)
   PrettyPrint(too_slow, digits = 0, include.rownames = FALSE)
-  # Store information about the trimming
-  attr(results, "TrimmedSlow") <- length(which(results$Latency > cutoff))
-  attr(results, "SlowCutOff") <- cutoff
   # Trim slow values
   results$Latency[results$Latency > too_slow] <- NA
   results$TooSlow <- NULL
@@ -212,6 +206,22 @@ TrimTooSlow <- function(results, sd_cutoff = 2) {
 }
 
 
+## Functions for trimming slow trials by groups
+
+TrimByGroup <- function(results, group) {
+  r <- FindCutoffByGroup(results, group)
+  ApplyCutoff(r)
+}
+
+FindCutoffByGroup <- function(results, group = NULL) {
+  ddply(results, group, mutate, Cutoff = ComputeUpperBound(Latency),
+        Drop = ifelse(Latency > Cutoff, "Drop", "Keep"))
+}
+
+ApplyCutoff <- function(results) {
+  results$Latency[results$Drop == "Drop"] <- NA
+  results
+}
 
 ComputeUpperBound <- function(x, sd_cutoff = 2) Average(x) + (sd_cutoff * sd(x, na.rm = T))
 
