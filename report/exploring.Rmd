@@ -12,11 +12,12 @@ source('R/01_functions.r', chdir = TRUE)
 load("data/results.RData")
 ```
 
-```{r, message=FALSE, warning=FALSE, echo =FALSE}
 
-```
-
-
+Count of Part  Column Labels		
+Row Labels	F	M	Grand Total
+CS1	         12	13	25
+CS2	         11	14	25
+Grand Total	23	27	50
 
 ## Reponses to JE's email:
 

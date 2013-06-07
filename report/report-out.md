@@ -1,38 +1,143 @@
-Do orienting stimuli create additional task demands in the looking-while-listening paradigm?
-============================================================================================
+Introduction and Rationale
+--------------------------
 
-Introduction
-------------
+-   The 2AFC looking-while-listening paradigm (LWL; Fernald, Zangl, Portillo, & Marchman, 2008) has become widely used to examine lexical processing in young children.
+-   The speed at which children look to familiar objects when hearing the object-name at 18 months reliably predicts vocabulary size up to 8 years of age (Marchman & Fernald, 2008).
+    -   However, these reaction time measures are not easily obtained.
+    -   Reaction time is a measure of how quickly a child looks to a picture when its object name is presented. Therefore, reaction time can be measured only on trials where the child is *not* looking at the target picture at the onset of the target word.
+    -   In a 2AFC paradigm, only about 50% of trials provide reaction time data.
+    -   Usually, even fewer trials provide reaction time data because there are always some trials where young children are not fixating on a picture at target word onset.
+    -   This is a considerable problem, given the small number of trials in LWL studies (usually between 24 and 36).
 
-The looking-while-listening paradigm (LWL; Fernald, Zangl, Portillo, & Marchman, 2008) uses eye-tracking to study lexical comprehension in young children. In this procedure, two images are presented on a computer screen followed by a prompt to look at one of the images. The data gathered through eye-tracking not only records *where* the child looks onscreen but *when* the child fixates on a particular image. The latency between the onset of a speech stimulus and an appropriate change of gaze location provides a measure of how rapidly the child accesses the word's lexical representation. Reaction time is related to vocabulary size in young children and is also predictive of later language abilities (Fernald, Swingley, & Pinto, 2001; Marchman & Fernald, 2008).
+-   Adults can be instructed to fixate on a central orienting stimuli, but young children cannot be similarly instructed.
+-   This study used an animated centering stimulus in an attempt to increase the number of trials with useable reaction times.
 
-Reaction times provide valuable information about the real-time processing of speech signal in children, but these data are not easily obtained. In a 2-alternative forced choice (2AFC) LWL paradigm, there is a 50% chance the child will be fixated on the target image at onset of the speech stimulus, so only half the trials will provide latency data. This problem is readily resolved in studies with adults by instructing participants to fixate on a central orienting image until they hear the stimulus. Unfortunately, young children cannot be similarly instructed.
+METHOD
+------
 
-In this study, we modified the LWL paradigm to include an animated centering stimulus in order to increase the number of trials with meaningful reaction time data. We hypothesized that the orienting animations will increase the "quality" of the eye-tracking data but may also introduce additional task demands that hinder response time and reduce accuracy.
+### Conditions
 
-Methods
--------
+Condition 1: No animated centering stimulus. Condition 2: Animated centering stimulus.
+
+-   Centering stimulus was an abstract geometric animation. It appeared onscreen after two images had been presented for 2000 ms. (**Describe and maybe show example**)
+-   The animation looped until the child had fixated on it for 300 ms or until 8000 ms had elapsed. Then the carrier phrase was played, at target-word onset, the centering stimulus disappeared.
+-   Because carrier phrase and target-word presentation were triggered by fixation to the animation, these trials incorporated *gaze-contingency* into the LWL paradigm.
 
 ### Participants
 
-The participants were fifty 30-- to 48-month-old children, 25 per condition (with and without the central fixation point). All participants passed a hearing screening and had age-appropriate speech and language, according to parent report.
+-   N = 25 (12 female, 13 male) in condition 1 and N = 25 (11 female, 14 male) in condition 2.
+-   Participants in the two groups closely matched on the basis of age, sex, and PPVT-4 standard score.
 
-### Procedure
+|---|:--|:--|:--|
+||Age (months)|EVT-2|PPVT-4|
+|CS1|39.44 (30–46)|62 (37–90)|90.2 (50–128)|
+|CS2|40.52 (31–48)|56.6 (27–90)|77.04 (45–118)|
 
-A 2AFC mispronunciation experiment was used in condition. In this experiment, children saw pictures of a familiar and an unfamiliar object and heard three types of stimuli in a carrier phrase: familiar real words, one-feature mispronunciations (*dog* vs. *tog*), and nonwords (/veif/). Children also received an expressive vocabulary test (EVT-2, Williams, 2007).
+### Methodology
 
-### Statistical Analysis
+-   Looking-while-listening mispronunciation paradigm (Swingley & Aslin, 2000; White & Morgan, 2008)
+-   Experiment designed in E-Prime Professional 2.0, used to interface with Tobii T60 XL Eye-tracker.
+-   Eye-tracking task presented to children as “watching a movie.”
+-   Images presented onscreen: one familiar and one unfamiliar object.
+-   Position counterbalanced (left-right).
+-   Images normed for familiarity and unfamiliarity.
 
-The log-odds of looking to the familiar object was the dependent variable. We used a growth curve model to model how children’s eye gaze patterns were related to their expressive vocabulary size (Mirman et al., 2008)
+#### Three conditions
 
-Results and Discussion
-----------------------
+1.  CP: Correct pronunciation of real words
+2.  MP: Mispronunciations of these real words, with a one-feature change of initial consonant
+3.  NW: Nonwords trials presented with familiar objects not used in CP trials
+
+-   Target words all CVC in the carrier phrases “See the \_\_\_\_!” or “Find the \_\_\_\_!”
+-   (6 CP + 6 MP + 6 NW) \* 2 repetitions + 2 other real-word familiarization trials = 38 trials
+-   2 blocks of 38 trials, eye-tracker calibrated before each block.
+-   Brief animation played every 6–7 trials to keep child engaged in task.
+
+![](mp_display.png)
+
+### Calculation of Latency (reaction time)
+
+-   Latency is the amount of time between target-word onset and the first look to target.
+-   Latency calculated for CP and NW trials only.
+-   On each trial, reaction time was calculated only if:
+
+    1.  the child looked onscreen within the 50 ms after target-word onset
+    2.  the child was not already looking at familiar object (CP trials) or at unfamiliar object (NW trials) during within 50 ms after target-word onset.
+
+-   Latency = Time of first look to target – time of first tracked look during target-word onset (0 to 50 ms)
+-   Reaction time trimming: We excluded latencies that were less than 250 ms or greater than 2SD above the group mean.
+
+### Research Questions
+
+-   Does the use of an animated centering stimulus result in more useable latencies?
+    -   That is, are there more trials with useable latencies in condition 2 as compared to condition 1?
+
+-   Does this animated centering stimulus create additional task demands?
+    -   Do children take longer to look to the target in condition 2 relative to condition 1?
+    -   Does the relationship between reaction time and vocabulary size reported in the literature continue to be observed when an animated centering stimulus is used?
+
+RESULTS
+-------
+
+-   As expected, children looked to familiar object in CP trials and to unfamiliar object in NW trials.
+
+### Latency Results
+
+-   Condition 1:
+    -   CP trials: Latencies available in 32.7% of trials (additional 4.8% trimmed)
+    -   NW trials: Latencies available in 30.5% of trials (additional 5.8% trimmed)
+
+-   Condition 2:
+    -   CP trials: Latencies available in 63.9% of trials (additional 8% trimmed)
+    -   NW trials: Latencies available in 61.3% of trials (additional 8.5% trimmed)
+
+-   Mean latencies are very similar across the two conditions and the two trial types.
+-   Distributions of latencies differs across the two conditions, with condition 2 (with the centering stimuli) having a more peaky and positively skewed distribution.
+
+![Figure 2. Histograms of latencies (in ms) for condition 1 (top) and condition 2 (bottom) for CP trials.](figure/unnamed-chunk-5.png)
+
+![Figure 2. Histograms of latencies (in ms) for condition 1 (top) and condition 2 (bottom) for CP trials.](figure/unnamed-chunk-6.png)
+
+![Figure 3. Histograms of latencies (in ms) for condition 1 (top) and condition 2 (bottom) for NW trials.](figure/unnamed-chunk-7.png)
+
+### Regression analyses
+
+-   Do age, receptive vocabulary size, or expressive vocabulary size predict latency for either the CP or the NW trials in the two conditions?
+-   We ran four separate multiple regression analyses with four dependent variables. These were mean latencies for each subject by condition (1 or 2), and by trial type (CP or NW).
+-   Independent variables were age, PPVT-4 raw score (receptive vocabulary size) and EVT-2 raw score (expressive vocabulary size).
+
+### Regression Results: Condition 1
+
+-   Age, trial type, and EVT-2 were significant predictors of latency.
+
+### Regression Results: Condition 2
+
+-   None of the independent variables were significant predictors of latency.
+
+### Discussion
+
+-   These results suggest that using an animated centering stimulus will yield more useable latency data.
+    -   About ??% of trials had useable latencies when a animated centering stimulus was used, as compared to ??% when it was not used.
+
+-   The fact that reaction times were not significantly different across the two conditions suggests that the animated centering stimulus does not create additional task demands.
+-   As in previous research, vocabulary size was a significant predictor of latency in condition 1 without the animated centering stimulus
+-   However, neither vocabulary size nor age was a significant predictor of latency when an animated centering stimulus was used.
+-   This result suggests that the effect of age and vocabulary size on latency may be due, at least in part, to older children and children with larger vocabularies having better attention to task. When an animated centering stimulus is used to maintain attention, the effect of age and vocabulary size on latency is no longer observed.
+-   To conclude, the use of an animated centering stimulus does not create additional task demands. Instead, it results in more useable latency data and better attention to task.
+
+### Acknowledgements
+
+Thanks to Franzo Law II, Alissa Schneeberg, Danielle Lee, David Kaplan, Morgan Meredith, Erica Richmond, Nancy Wermuth, and other members of the Learning To Talk Laboratory for help with many aspects of this study. We also thank the children who participated and their parents.
+
+This research was supported by NIDCD Grant R01-02932 to Jan Edwards, Mary Beckman, and Benjamin Munson and NICHD Grant P30-HD03352 to the Waisman Center.
 
 References
 ----------
 
-Fernald, A., Swingley, D., & Pinto, J. P. (2001). When Half a Word Is Enough: Infants Can Recognize Spoken Words Using Partial Phonetic Information. *Child Development*, *72*(4), 1003–1015. doi:10.1111/1467-8624.00331
-
 Fernald, A., Zangl, R., Portillo, A. L., & Marchman, V. A. (2008). Looking while listening: Using eye movements to monitor spoken language comprehension by infants and young children. In I. A. Sekerina, E. M. Fernández, & H. Clahsen (Eds.), *Developmental Psycholinguistics: On-line Methods in Children’s Language Processing* (pp. 97–135). Amsterdam: John Benjamins Publishing Company.
 
 Marchman, V. A., & Fernald, A. (2008). Speed of word recognition and vocabulary knowledge in infancy predict cognitive and language outcomes in later childhood. *Developmental Science*, *11*(3), F9–F16. doi:10.1111/j.1467-7687.2008.00671.x
+
+Swingley, D., & Aslin, R. N. (2000). Spoken word recognition and lexical representation in very young children. *Cognition*, *76*(2), 147–166. doi:10.1016/s0010-0277(00)00081-0
+
+White, K. S., & Morgan, J. L. (2008). Sub-segmental detail in early lexical representations. *Journal of Memory and Language*, *59*(1), 114–132. doi:10.1016/j.jml.2008.03.001

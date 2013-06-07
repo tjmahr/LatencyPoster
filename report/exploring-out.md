@@ -8,6 +8,17 @@ This `Rmd` file is where I try to figure out what's going on in the data.
 setwd("../")
 source("R/01_functions.r", chdir = TRUE)
 load("data/results.RData")
+
+short <- unique(results[c("Version", "Subject", "Gender")])
+
+ddply(results, ~Version + Subject, summarize, Counts = length(Gender))
+ddpl
+~~~~
+
+    ## Error: object 'ddpl' not found
+
+~~~~ {.r}
+names(results)
 ~~~~
 
 Reponses to JE's email:
@@ -31,25 +42,24 @@ PrintDescriptives(results)
 
 ||**CS1**|**CS2**|
 |---|:------|:------|
-|n|285|579|
-|mean|756.8|752.1|
-|sd|451.1|484.7|
-|median|699.5|616.2|
-|trimmed|702.5|687.8|
-|mad|345.7|370.4|
+|n|340|979|
+|mean|686.4|775.8|
+|sd|430.4|516.7|
+|median|599.6|616.2|
+|trimmed|635.6|701.7|
+|mad|321.0|395.1|
 |min|66.62|66.62|
 |max|2498|2482|
 |range|2432|2415|
-|se|26.72|20.14|
+|se|23.34|16.51|
 
 ~~~~ {.r}
 ComputePercentNA(results)
 ~~~~
 
-||**Version**|**NA Latencies**|**Real Latencies**|**Percent NA**|
-|---|:----------|:---------------|:-----------------|:-------------|
-|1|CS1|567.00|285.00|66.55|
-|2|CS2|345.00|579.00|37.34|
+    ## Error: could not find function "ComputePercentNA"
+
+Table: Response rates for the experiment versions, before trimming.
 
 Now we trim of the too-fast values using 250 ms as the cut-off.
 
@@ -57,10 +67,10 @@ Now we trim of the too-fast values using 250 ms as the cut-off.
 results <- TrimTooFast(results, cutoff = 250)
 ~~~~
 
-||**Version**|**Num \> 250 ms**|**Num \< 250 ms**|**Num NA**|
-|---|:----------|:----------------|:----------------|:---------|
-|1|CS1|259.00|26.00|567.00|
-|2|CS2|531.00|48.00|345.00|
+|**Version**|**Num \> 250 ms**|**Num \<= 250 ms**|**Num NA**|
+|:----------|:----------------|:-----------------|:---------|
+|CS1|298|42|620|
+|CS2|905|74|585|
 
 The upper-bound of the trimming depends on what pool of latencies are used to compute the standard deviation used for the 2-SD cut-off.
 
@@ -76,7 +86,7 @@ DropAboveUpperBound <- function(df) {
 ComputeUpperBound(results$Latency)
 ~~~~
 
-    ## [1] 1723
+    ## [1] 1774
 
 ~~~~ {.r}
 # Separating the two experiments
@@ -84,10 +94,10 @@ by(results$Latency, results$Version, ComputeUpperBound)
 ~~~~
 
     ## results$Version: CS1
-    ## [1] 1674
+    ## [1] 1570
     ## -------------------------------------------------------- 
     ## results$Version: CS2
-    ## [1] 1746
+    ## [1] 1834
 
 ~~~~ {.r}
 cs1 <- subset(results, Version == "CS1")
@@ -103,31 +113,30 @@ PrintDescriptives(results)
 
 ||**CS1**|**CS2**|
 |---|:------|:------|
-|n|243|496|
-|mean|734.4|720.4|
-|sd|285.2|350.5|
-|median|699.5|632.9|
-|trimmed|715.8|681.5|
-|mad|296.3|345.7|
+|n|283|853|
+|mean|679.2|732.2|
+|sd|261.8|374.5|
+|median|632.9|616.2|
+|trimmed|660.4|688.6|
+|mad|271.6|345.7|
 |min|249.8|249.8|
-|max|1649|1715|
-|range|1399|1466|
-|se|18.29|15.74|
+|max|1482|1815|
+|range|1232|1566|
+|se|15.56|12.82|
 
 ~~~~ {.r}
 ComputePercentNA(results)
 ~~~~
 
-||**Version**|**NA Latencies**|**Real Latencies**|**Percent NA**|
-|---|:----------|:---------------|:-----------------|:-------------|
-|1|CS1|609.00|243.00|71.48|
-|2|CS2|428.00|496.00|46.32|
+    ## Error: could not find function "ComputePercentNA"
+
+Table: Response rates for the experiment versions, after trimming.
 
 ### *After trimming, is the average latency shorter for CS2 as compared to CS1? (as it was before trimming)?*
 
 Yes.
 
-### Is there a relationship between vocab size (either EVT-2 raw score of PPVT-4 raw score) and latency for CS1?
+### *Is there a relationship between vocab size (either EVT-2 raw score of PPVT-4 raw score) and latency for CS1?*
 
 I'm going to compute the average latency within each subject and plot latency as a function of EVT and PPVT.
 
@@ -146,13 +155,9 @@ qplot(data = cs1, x = EVT, y = Latency) + geom_smooth(method = "lm")
 qplot(data = cs1, x = PPVT, y = Latency) + geom_smooth(method = "lm")
 ~~~~
 
-    ## Warning: Removed 2 rows containing missing values (stat_smooth).
-
-    ## Warning: Removed 2 rows containing missing values (geom_point).
-
 ![plot of chunk unnamed-chunk-9](figure/unnamed-chunk-92.png)
 
-1.  Same question for CS2?
+### *Same question for CS2?*
 
 For the aggregated values, there is some correlation between EVT and latency.
 
@@ -169,10 +174,6 @@ qplot(data = cs2, x = EVT, y = Latency) + geom_smooth(method = "lm")
 qplot(data = cs2, x = PPVT, y = Latency) + geom_smooth(method = "lm")
 ~~~~
 
-    ## Warning: Removed 1 rows containing missing values (stat_smooth).
-
-    ## Warning: Removed 1 rows containing missing values (geom_point).
-
 ![plot of chunk unnamed-chunk-10](figure/unnamed-chunk-102.png)
 
 ~~~~ {.r}
@@ -184,16 +185,16 @@ summary(lm(Latency ~ EVT, cs2))
     ## lm(formula = Latency ~ EVT, data = cs2)
     ## 
     ## Residuals:
-    ##    Min     1Q Median     3Q    Max 
-    ## -188.4  -76.8  -12.4   67.2  251.1 
+    ##     Min      1Q  Median      3Q     Max 
+    ## -153.32  -61.70   -8.25   68.39  145.50 
     ## 
     ## Coefficients:
     ##             Estimate Std. Error t value Pr(>|t|)    
-    ## (Intercept)   874.26      86.99    10.1  5.9e-11 ***
-    ## EVT            -2.50       1.47    -1.7      0.1    
+    ## (Intercept)   830.99      65.96   12.60  8.3e-12 ***
+    ## EVT            -1.54       1.13   -1.36     0.19    
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
     ## 
-    ## Residual standard error: 110 on 29 degrees of freedom
-    ## Multiple R-squared:  0.0904, Adjusted R-squared:  0.059 
-    ## F-statistic: 2.88 on 1 and 29 DF,  p-value: 0.1
+    ## Residual standard error: 80.2 on 23 degrees of freedom
+    ## Multiple R-squared:  0.0743, Adjusted R-squared:  0.0341 
+    ## F-statistic: 1.85 on 1 and 23 DF,  p-value: 0.187

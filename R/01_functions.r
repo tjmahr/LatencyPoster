@@ -137,7 +137,7 @@ GetLooksAfterWindow <- function(trial, window) {
 `%lacks%` <- function(x, y) !any(y %in% x)
 IsAllNA <- function(x) all(is.na(x))
 
-CalculatePercentNA <- function(x) as.percent(Count(x) / length(x))
+CalculatePercentNA <- function(x) 100 - as.percent(Count(x) / length(x))
 as.percent <- function(x, digits = 4) round(x, digits) * 100
 Count <- function(x) length(x[!is.na(x)])
 Average <- function(x) mean(x, na.rm = TRUE)
@@ -220,7 +220,9 @@ DropAboveUpperBound <- function(df) {
   df$Latency[df$Latency > cutoff] <- NA
   df
 }
-DropAboveUpperBound(results)
+
+
+
 
 
 #### Data output shortcuts ----------------------------------------------------
@@ -232,6 +234,22 @@ PrintDescriptives <- function(results) {
   descriptives <- t(descriptives)[-c(1:3), ]
   descriptives <- as.data.frame(descriptives)
   PrettyPrint(descriptives)
+}
+
+
+mean_sd <- function(x) {
+  avg <- round(Average(x))
+  SD <- round(sd(x, na.rm = TRUE))
+  paste0(avg, " (", SD, ")")
+}
+
+
+
+
+
+DisplayMeanRange <- function(x) {
+  avg <- round(Average(x), 2)
+  paste0(avg, " (", range(x)[1], "--", range(x)[2], ")")
 }
 
 PrettyPrint <- function(x, ...) suppressWarnings(print(ascii(x, ...), type = "pandoc"))

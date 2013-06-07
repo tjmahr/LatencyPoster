@@ -18,12 +18,23 @@ ApplyCutoff <- function(results) {
 
 
 
+
+
+
+
+DisplayPercentNA(results)
+PrintDescriptives(results)
+
+
+
+
+
 qplot(data = results, x = Latency, fill = Condition) + facet_grid(Version~Condition)
 
 results <- FindCutoffByGroup(results, "Subject")
 qplot(data = results, x = Latency, fill = Drop) + facet_wrap(TargetWord~., ncol = 4)
-
-ComputePercentNA(results)
+Com
+DisplayPercentNA(results)
 PrintDescriptives(results)
 
 # Trim impossibly fast latencies. Trim slow latencies within each subject.
@@ -36,7 +47,7 @@ mean_sd <- function(x) {
   paste0(avg, " (", SD, ")")
 }
 
-aggregate(Latency ~ Version + Condition, data = results, mean_sd)
+
 
 
 
