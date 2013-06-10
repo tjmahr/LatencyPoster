@@ -1,6 +1,7 @@
 library(knitr)
 library(ascii)
 library(stringr)
+library(xlsx)
 
 library(reshape2)
 library(plyr)
@@ -10,7 +11,6 @@ library(ggplot2)
 library(lme4)
 library(psych)
 library(lmSupport)
-# library(retimes)
 
 
 #### Functions for handling LWL data ------------------------------------------
@@ -23,7 +23,8 @@ LoadAllMPData <- function(subject_paths) {
   trial_frame <- ldply(trials, MakeLongTrial)
   
   # Make subjects a factor
-  trial_frame$Gender <- str_extract(trial_frame$Subject, "^[MF]")
+  trial_frame$Gender <- str_extract(trial_frame$Subject, "[MF]")
+  trial_frame$Gender <- factor(trial_frame$Gender)
   trial_frame$Subject <- str_extract(trial_frame$Subject, "^[0-9]{3}")
   trial_frame$Subject <- factor(trial_frame$Subject)
   trial_frame
@@ -154,8 +155,6 @@ DetermineVisitNumber <- function(subject_frame) {
   merge(subject_frame, visits, by = "DateTime")  
 }
 
-
-
 RenumberTrials <- function(subject_frame) {
   offset <- ifelse(unique(subject_frame$Group == "CS2a"), 36, 38)
   trials <- subject_frame$TrialNo
@@ -272,8 +271,8 @@ PrintFp <- function(model, p_digits = 3) {
 
 
 DisplayMeanRange <- function(x) {
-  avg <- round(Average(x), 2)
-  paste0(avg, " (", range(x)[1], "--", range(x)[2], ")")
+  avg <- round(Average(x), 1)
+  paste0(avg, " (", range(x, na.rm=T)[1], "--", range(x, na.rm=T)[2], ")")
 }
 
 PrettyPrint <- function(x, ...) suppressWarnings(print(ascii(x, ...), type = "pandoc"))
