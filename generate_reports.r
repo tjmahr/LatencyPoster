@@ -1,4 +1,5 @@
 # This script generates the final version of the presentation's report.
+library(knitr)
 
 setwd("report")
 
