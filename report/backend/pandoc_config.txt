@@ -1,9 +1,9 @@
-s: 
 smart: 
 csl: backend/apa_style.csl
 bibliography: refs.bib
 
 format: html5
+include-in-header: backend/knitr_bootstrap.html
 o: report-out.html
 
 format: docx
