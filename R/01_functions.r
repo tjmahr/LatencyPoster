@@ -15,7 +15,7 @@ library(lmSupport)
 
 #### Functions for handling LWL data ------------------------------------------
 
-# source('L:/scripts/LookingWhileListeningBeta.r', chdir = TRUE)
+source('L:/scripts/LookingWhileListeningBeta.r', chdir = TRUE)
 
 LoadAllMPData <- function(subject_paths) {
   sessions <- lapply(subject_paths, LoadAndReduceData)
@@ -40,6 +40,7 @@ MakeLongTrial <- function(trial, columns = c("GazeByImageAOI", "XMean.Target")) 
   trial$DateTime <- trial %@% "DateTime"
   trial$WordGroup <- trial %@% "WordGroup"
   trial$TargetWord <- trial %@% "Target"
+  trial$Task <- trial %@% "Task"
 
   id_vars <- c("Subject", "Dialect", "Block", "TrialNo", "Time", "Condition", 
                "WordGroup", "TargetWord", "DateTime", columns)
@@ -47,10 +48,12 @@ MakeLongTrial <- function(trial, columns = c("GazeByImageAOI", "XMean.Target")) 
   trial_frame
 }
 
-ListFoldersInGazeDir <- function(gaze_dir, select) {
+ListFoldersInGazeDir <- function(gaze_dir, select = NULL) {
   subjects <- list.files(gaze_dir, pattern = "^[0-9]{3}[CLP]")
   short_names <- str_extract(subjects, pattern = "^[0-9]{3}[CLP]")
-  subjects <- subjects[short_names %in% selected]
+  if (!is.null(select)) {
+    subjects <- subjects[short_names %in% select]  
+  }
   paste0(gaze_dir, "/", subjects)
 }
 
@@ -143,6 +146,17 @@ as.percent <- function(x, digits = 4) round(x, digits) * 100
 Count <- function(x) length(x[!is.na(x)])
 Average <- function(x) mean(x, na.rm = TRUE)
 
+
+
+
+#### Data loading and merging -------------------------------------------------
+`%copies_of%` <- function(times, x) rep.int(x, times)
+
+SelectRename <- function(dataframe, columns) {
+  dataframe_new <- dataframe[columns]
+  names(dataframe_new) <- names(columns)
+  dataframe_new
+}
 
 
 

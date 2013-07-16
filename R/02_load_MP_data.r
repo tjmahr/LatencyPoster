@@ -7,9 +7,9 @@
 source('R/01_functions.r', chdir = TRUE)
 
 # Load only matched subjects
-matching_path <- "data/Latency_AgeMatch.xlsx"
-matching_info <- read.xlsx(matching_path, sheetName = "Long")
-selected <- as.character(matching_info$Subjects)
+matching_path <- "data/Latency_AgeMatch.csv"
+matching_info <- read.csv(matching_path)
+selected <- as.character(matching_info$Part)
 
 task_dir <- "L:/DataAnalysis/Mispronunciation/"
 setwd(task_dir)
@@ -64,7 +64,7 @@ save(trials, file = "data/trials.RData")
 
 #### Merge the participant info with Trial data -------------------------------
 
-info_path <- "L:/Participant Info/ParticipantCrossSectionalDataSummary.xls"
+info_path <- "L:/participantinfo/ParticipantCrossSectionalDataSummary.xls"
 subject_info <- read.xlsx(info_path, sheetName = "Participant Summary")
 
 # We want age, vocab scores, and whether they were excluded
@@ -74,7 +74,35 @@ subject_info <- subject_info[selected_columns]
 names(subject_info) <- c("Subject", "Age", "EVT", "EVT_Standard", "PPVT", 
                          "PPVT_Standard", "Keeper")
 subject_info$Subject <- factor(str_extract(subject_info$Subject, "^[0-9]{3}"))
-rw_ns_data <- merge(trials, subject_info, by = "Subject")
+
+
+
+
+#### Get the scores for the BRIEF ---------------------------------------------
+
+brief_path <- "L:/participantinfo/ParentQuestionnaireDataBase/BriefPCrossSectional.xlsx"
+
+# Values to take from the BRIEF sheet
+brief_base <- c(Inhibit = "Inhibit", Shift = "Shift", WorkingMemory = "WorkingMemory",
+                EmotionalControl = "EmotionalControl", PlanOrganize = "PlanOrganize")
+brief_suffix <- c(TScore = "_T", Percentile = "_percentile")
+
+brief <- paste0(brief_base, 5 %copies_of% brief_suffix)
+names(brief) <- paste0(names(brief_base), 5 %copies_of% names(brief_suffix))
+brief <- brief[order(names(brief))]
+brief <- c(Subject = "Participant_ID", brief)
+
+brief_scores <- read.xlsx(file=brief_path, sheetIndex=1)
+brief_scores <- SelectRename(brief_scores, brief)
+brief_scores$Subject <- factor(str_extract(brief_scores$Subject, "^[0-9]{3}"))
+
+subject_info <- merge(subject_info, brief_scores, by="Subject")
+
+
+
+
+#### Finalize output ----------------------------------------------------------
+rw_ns_data <- merge(trials, subject_info, by="Subject")
 
 # Renumber participant IDs
 rw_ns_data$Subject <- factor(as.numeric(rw_ns_data$Subject))
