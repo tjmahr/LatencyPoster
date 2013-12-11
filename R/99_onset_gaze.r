@@ -108,7 +108,7 @@ ggplot(data = subject_means, aes(x = EVT, y = Latency, color = Condition)) +
 
 subject_means2 <- aggregate(Latency ~ Subject + Age + EVT + OnsetGaze, 
                             data = results, Average)
-m2 <- lm(Latency ~ EVT * OnsetGaze, subject_means)
+m2 <- lm(Latency ~ EVT * OnsetGaze, subject_means2)
 summary(m2)
 
 ggplot(data = subject_means2, aes(x = EVT, y = Latency, color = OnsetGaze)) + 
