@@ -15,7 +15,9 @@ library(lmSupport)
 
 #### Functions for handling LWL data ------------------------------------------
 
-source('L:/scripts/LookingWhileListeningBeta.r', chdir = TRUE)
+if (file.exists("L:/scripts/LookingWhileListeningBeta.r")) {
+  source('L:/scripts/LookingWhileListeningBeta.r')
+}  
 
 LoadAllMPData <- function(subject_paths) {
   sessions <- lapply(subject_paths, LoadAndReduceData)
