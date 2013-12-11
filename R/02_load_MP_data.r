@@ -22,6 +22,13 @@ cs1$Group <- "CS1"
 # Cross-sectional 2 
 pilot_paths <- ListFoldersInGazeDir("Archive_CrossSectional2_Pilot", selected)
 new_paths <- ListFoldersInGazeDir("CrossSectional2_UW", selected)
+
+# Remove pilot that were tested again after piloting
+doubles <- intersect(str_extract(pilot_paths, "[0-9]{3}C"), 
+                     str_extract(new_paths, "[0-9]{3}C"))
+is_double <- function(x) str_extract(x, "[0-9]{3}C") %in% doubles
+pilot_paths <- Filter(Negate(is_double), pilot_paths)
+
 cs2a <- LoadAllMPData(pilot_paths)
 cs2b <- LoadAllMPData(new_paths)
 cs2a$Group <- "CS2a"
@@ -35,7 +42,7 @@ cs2 <- rbind(cs2a, cs2b)
 
 all_the_data <- rbind(cs1, cs2)
 
-names(all_the_data)[which(names(all_the_data) == "XMean.Target")] <- "XMeanTarget"
+names(all_the_data)[which(names(all_the_data) == "XMeanToTarget")] <- "XMeanTarget"
 all_the_data$XMeanTarget <- round(all_the_data$XMeanTarget, 3)
 
 # Code categorical variables as factors
@@ -55,6 +62,7 @@ save(all_the_data, file = "data/mp_trials.RData")
 
 # Grab the real and nonsense trials. Save them.
 trials <- subset(all_the_data, Condition == "real" | Condition == "nonsense")
+mp_trials <- subset(all_the_data, Condition == "MP")
 
 write.csv(trials, file = "data/trials.csv", row.names = FALSE)
 save(trials, file = "data/trials.RData") 
@@ -92,20 +100,25 @@ names(brief) <- paste0(names(brief_base), 5 %copies_of% names(brief_suffix))
 brief <- brief[order(names(brief))]
 brief <- c(Subject = "Participant_ID", brief)
 
-brief_scores <- read.xlsx(file=brief_path, sheetIndex=1)
+brief_scores <- read.xlsx(file = brief_path, sheetIndex = 1)
 brief_scores <- SelectRename(brief_scores, brief)
 brief_scores$Subject <- factor(str_extract(brief_scores$Subject, "^[0-9]{3}"))
 
-subject_info <- merge(subject_info, brief_scores, by="Subject")
+subject_info <- merge(subject_info, brief_scores, by = "Subject")
 
 
 
 
 #### Finalize output ----------------------------------------------------------
-rw_ns_data <- merge(trials, subject_info, by="Subject")
+rw_ns_data <- merge(trials, subject_info, by = "Subject")
+mp_data <- merge(mp_trials, subject_info, by = "Subject")
 
 # Renumber participant IDs
 rw_ns_data$Subject <- factor(as.numeric(rw_ns_data$Subject))
+mp_data$Subject <- factor(as.numeric(mp_data$Subject))
+
+
 
 write.csv(rw_ns_data, file = "data/rw_ns_data.csv", row.names = FALSE)
 save(rw_ns_data, file = "data/rw_ns_data.RData")
+save(mp_data, file = "data/mp_data.RData")

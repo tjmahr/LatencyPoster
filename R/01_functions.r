@@ -31,7 +31,7 @@ LoadAllMPData <- function(subject_paths) {
 }
 
 # Convert a Trial object and its attributes into a long dataframe.
-MakeLongTrial <- function(trial, columns = c("GazeByImageAOI", "XMean.Target")) {
+MakeLongTrial <- function(trial, columns = c("GazeByImageAOI", "XMeanToTarget")) {
   trial$Subject <- trial %@% "Subject"
   trial$Dialect <- trial %@% "Dialect"
   trial$Condition <- trial %@% "StimType"
@@ -74,6 +74,7 @@ MakeLatencyCalculator <- function(window, target) {
 CalculateLatency <- function(trial, onset_window, target_name) {
   onset_time <- CheckLatencyOnset(trial, onset_window, target_name)
   first_look <- FindFirstLook(trial, onset_window, target_name)
+  onset_gaze <- FindGazeAtOnset(trial, onset_window, target_name)
   
   # The response latency is the time between the onset and the first look to
   # target. A latency calculation therefore requires a valid onset and a valid
@@ -86,7 +87,8 @@ CalculateLatency <- function(trial, onset_window, target_name) {
   
   # Extract non-redundant info about trial and combine with latency info
   info <- unique(subset(trial, select = -c(Time, XMeanTarget, GazeByImageAOI)))
-  cbind(info, Latency = latency, Onset = onset_time, FirstLook = first_look)
+  cbind(info, Latency = latency, Onset = onset_time, FirstLook = first_look, 
+        OnsetGaze = onset_gaze)
 }
 
 CheckLatencyOnset <- function(trial, onset_window, target_name) {
@@ -115,6 +117,18 @@ FindFirstLook <- function(trial, onset_window, target_name) {
   first_look  
 }
 
+
+FindGazeAtOnset <- function(trial, onset_window, target_name) {
+  # An invalid onset contains a look to the target or contains all NA values. 
+  window <- GetLooksWithinWindow(trial, onset_window)
+  if(IsAllNA(window$GazeByImageAOI)) {
+    gaze_location <- NA
+  } else {
+    valid_looks <- subset(window, !is.na(GazeByImageAOI))
+    gaze_location <- valid_looks[1, "GazeByImageAOI"]
+  }
+  gaze_location  
+}
 
 
 
